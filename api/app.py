@@ -11,10 +11,17 @@ import os
 
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
+
+# Configure CORS to only allow specific origins instead of allowing all requests.
+# Origins can be supplied via the ALLOWED_ORIGINS environment variable as a
+# comma-separated list (e.g. "https://example.com,http://localhost:8080").
+allowed_origins = [
+    o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=allowed_origins,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
