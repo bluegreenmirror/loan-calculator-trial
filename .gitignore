@@ -1,0 +1,35 @@
+# Environment variables
+.env
+*.env.*
+!*.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.nox/
+.eggs/
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Docker
+docker-compose.override.yml
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
