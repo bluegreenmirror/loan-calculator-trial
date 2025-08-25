@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file: .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - EMAIL=${EMAIL}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - webdist:/srv:ro
+    depends_on:
+      - web
+      - api
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    volumes:
+      - webdist:/site:ro
+
+  api:
+    build: ./api
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+  webdist:
