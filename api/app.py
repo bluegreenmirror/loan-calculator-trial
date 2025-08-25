@@ -90,3 +90,26 @@ def create_lead(lead: LeadReq):
         json.dump(data, f)
     return LeadResp(message="Lead received")
 
+
+class TrackReq(BaseModel):
+    affiliate: str
+
+
+class TrackResp(BaseModel):
+    message: str
+
+
+@app.post("/api/track", response_model=TrackResp)
+def track_click(track: TrackReq):
+    track_file = "tracks.json"
+    entry = {"affiliate": track.affiliate, "timestamp": datetime.utcnow().isoformat()}
+    if os.path.exists(track_file):
+        with open(track_file, "r") as f:
+            data = json.load(f)
+    else:
+        data = []
+    data.append(entry)
+    with open(track_file, "w") as f:
+        json.dump(data, f)
+    return TrackResp(message="Tracked")
+
