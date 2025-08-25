@@ -111,11 +111,24 @@ Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
    └─ CONTRIBUTING.md  # Contribution guide
 ```
 
-## Contributing
-See `CONTRIBUTING.md` for commit conventions and setup. See `docs/agents.md` if you’re using automation to generate PRs.
-
 ## Roadmap
 - Add lead form to front‑end and connect to `/api/leads`.
 - Add `/api/track` endpoint and JS to record affiliate clicks.
 - Support additional asset classes (boats, heavy equipment).
 - Provide dealership analytics and export functionality.
+=======
+## API endpoints
+
+- `GET /api/health` – service health check.
+- `POST /api/quote` – compute financing details.
+- `POST /api/leads` – store submitted leads.
+- `POST /api/track` – log affiliate clicks with a timestamp.
+
+## Affiliate tracking
+
+The frontend captures `aff` and common UTM query parameters. When an affiliate ID
+is present it is sent to the backend `/api/track` endpoint and stored in
+`localStorage` for later use.
+
+## Contributing
+See `CONTRIBUTING.md` for commit conventions and setup. See `docs/agents.md` if you’re using automation to generate PRs.
