@@ -1,7 +1,24 @@
+   
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
+from datetime import datetime
+import json
+import os
+
+
+
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 class QuoteReq(BaseModel):
     vehicle_price: float = Field(..., gt=0)
@@ -38,4 +55,31 @@ def quote(q: QuoteReq):
         monthly_payment=round(monthly, 2),
         total_interest=round(max(total - principal, 0), 2),
         total_cost=round(total, 2)
-    )
+)
+
+class LeadReq(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    vehicle_type: Optional[str] = None
+    price: Optional[float] = None
+    affiliate: Optional[str] = None
+
+class LeadResp(BaseModel):
+    message: str
+
+@app.post("/api/leads", response_model=LeadResp)
+def create_lead(lead: LeadReq):
+    leads_file = "leads.json"
+    lead_entry = lead.dict()
+    lead_entry["timestamp"] = datetime.utcnow().isoformat()
+    if os.path.exists(leads_file):
+        with open(leads_file, "r") as f:
+            data = json.load(f)
+    else:
+        data = []
+    data.append(lead_entry)
+    with open(leads_file, "w") as f:
+        json.dump(data, f)
+    return LeadResp(message="Lead received")
+
