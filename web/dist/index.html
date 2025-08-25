@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loan Payment Calculator — Auto, RV, Motorcycle, Jet Ski</title>
+  <meta name="description" content="Clean, fast loan calculator with presets for cars, RVs, motorcycles, and jet skis."/>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#0b0f14; color:#e9eef5 }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px }
+    .card { background:#121821; border:1px solid #1a2230; border-radius:12px; padding:18px }
+    label { color:#9aa5b1; display:block; margin:8px 0 4px }
+    input, select, button { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #263042; background:#0f141c; color:#e9eef5 }
+    .grid { display:grid; gap:12px }
+    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr } }
+    .row { display:grid; grid-template-columns: 1fr auto; gap: 8px; align-items:center }
+    .kpi { display:flex; justify-content:space-between; background:#0f141c; border:1px solid #263042; border-radius:10px; padding:12px 14px }
+    .kpi .v { font-variant-numeric: tabular-nums; font-size: 1.4rem }
+    .btn-primary { background: linear-gradient(135deg, #4cc38a, #22c55e); color:#07210f; border:0; font-weight:600 }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Loan Payment Calculator</h1>
+    <div class="card grid grid-2">
+      <div>
+        <label>Vehicle type</label>
+        <select id="veh">
+          <option value="auto">Auto</option>
+          <option value="rv">RV</option>
+          <option value="moto">Motorcycle</option>
+          <option value="ski">Jet Ski</option>
+        </select>
+
+        <label>Price ($)</label>
+        <input id="price" type="number" value="35000" />
+
+        <label>Down payment ($)</label>
+        <input id="down" type="number" value="3000" />
+
+        <label>Trade-in value ($)</label>
+        <input id="trade" type="number" value="0" />
+
+        <div class="grid grid-2">
+          <div>
+            <label>APR (%)</label>
+            <input id="apr" type="number" value="6.9" step="0.1" />
+          </div>
+          <div>
+            <label>Term (months)</label>
+            <input id="term" type="number" value="60" />
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div>
+            <label>Tax rate</label>
+            <input id="tax" type="number" value="9.5" step="0.1" />
+          </div>
+          <div>
+            <label>Fees ($)</label>
+            <input id="fees" type="number" value="495" />
+          </div>
+        </div>
+
+        <br/>
+        <button class="btn-primary" id="calc">Calculate</button>
+      </div>
+
+      <div id="out">
+        <div class="kpi"><span>Amount financed</span><span class="v" id="fin">$0</span></div>
+        <div class="kpi"><span>Monthly payment</span><span class="v" id="pay">$0</span></div>
+        <div class="kpi"><span>Total interest</span><span class="v" id="int">$0</span></div>
+        <div class="kpi"><span>Total cost</span><span class="v" id="tot">$0</span></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const presets = {
+  auto: { apr: 6.9, term: 60 },
+  rv:   { apr: 8.9, term: 120 },
+  moto: { apr: 7.9, term: 48 },
+  ski:  { apr: 9.9, term: 36 }
+};
+
+function pmnt(principal, aprPct, n) {
+  const r = (aprPct/100)/12;
+  if (r === 0) return principal / n;
+  return principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+}
+function fmt(n){ return n.toLocaleString(undefined, {style:'currency', currency:'USD'}) }
+
+function calc(){
+  const price = +priceEl.value || 0;
+  const down  = +downEl.value  || 0;
+  const trade = +tradeEl.value || 0;
+  const apr   = +aprEl.value   || 0;
+  const term  = +termEl.value  || 1;
+  const tax   = (+taxEl.value || 0)/100;
+  const fees  = +feesEl.value  || 0;
+
+  const taxableBase = Math.max(price - trade, 0);
+  const taxes = taxableBase * tax;
+  const principal = Math.max(price + taxes + fees - down - trade, 0);
+  const monthly = pmnt(principal, apr, term);
+  const total = monthly * term;
+  const interest = Math.max(total - principal, 0);
+
+  fin.textContent = fmt(principal);
+  pay.textContent = fmt(monthly);
+  int.textContent = fmt(interest);
+  tot.textContent = fmt(total);
+}
+
+const veh = document.getElementById('veh');
+const priceEl = document.getElementById('price');
+const downEl = document.getElementById('down');
+const tradeEl = document.getElementById('trade');
+const aprEl = document.getElementById('apr');
+const termEl = document.getElementById('term');
+const taxEl = document.getElementById('tax');
+const feesEl = document.getElementById('fees');
+const fin = document.getElementById('fin');
+const pay = document.getElementById('pay');
+const int = document.getElementById('int');
+const tot = document.getElementById('tot');
+document.getElementById('calc').addEventListener('click', calc);
+veh.addEventListener('change', () => {
+  aprEl.value = presets[veh.value].apr;
+  termEl.value = presets[veh.value].term;
+});
+calc();
+</script>
+</body>
+</html>
