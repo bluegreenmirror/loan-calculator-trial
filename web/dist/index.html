@@ -77,6 +77,21 @@
   </div>
 
 <script>
+const params = new URLSearchParams(window.location.search);
+const aff = params.get('aff');
+['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(k => {
+  const v = params.get(k);
+  if (v) localStorage.setItem(k, v);
+});
+if (aff) {
+  localStorage.setItem('affiliate', aff);
+  fetch('/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ affiliate: aff })
+  });
+}
+
 const presets = {
   auto: { apr: 6.9, term: 60 },
   rv:   { apr: 8.9, term: 120 },

@@ -10,3 +10,16 @@ origins that are permitted to access the API (for example,
 If `ALLOWED_ORIGINS` is not provided, cross-origin requests will be blocked by
 default to reduce the risk of malicious sites interacting with the service.
 
+## API endpoints
+
+- `GET /api/health` – service health check.
+- `POST /api/quote` – compute financing details.
+- `POST /api/leads` – store submitted leads.
+- `POST /api/track` – log affiliate clicks with a timestamp.
+
+## Affiliate tracking
+
+The frontend captures `aff` and common UTM query parameters. When an affiliate ID
+is present it is sent to the backend `/api/track` endpoint and stored in
+`localStorage` for later use.
+
