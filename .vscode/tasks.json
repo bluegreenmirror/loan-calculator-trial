@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "docker: up",
+      "type": "shell",
+      "command": "./deploy.sh --build",
+      "problemMatcher": []
+    },
+    {
+      "label": "docker: down",
+      "type": "shell",
+      "command": "docker compose down",
+      "problemMatcher": []
+    },
+    {
+      "label": "dev: up",
+      "type": "shell",
+      "command": "bash -lc 'cat > .env <<\\nEOF\\nDOMAIN=localhost\\nEMAIL=test@example.com\\nADDR=http://localhost\\nAUTO_HTTPS=auto_https off\\nTLS_DIRECTIVE=\\nHSTS_LINE=\\nCOMPOSE_PROJECT_NAME=loancalc\\nEOF\\n./deploy.sh --build'",
+      "problemMatcher": []
+    },
+    {
+      "label": "prod: up",
+      "type": "shell",
+      "command": "bash -lc 'read -p \"Domain: \" DOMAIN; read -p \"Admin email: \" EMAIL; cat > .env <<\\nEOF\\nDOMAIN=${DOMAIN}\\nEMAIL=${EMAIL}\\nADDR=${DOMAIN}\\nAUTO_HTTPS=\\nTLS_DIRECTIVE=tls ${EMAIL}\\nHSTS_LINE=Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\\nCOMPOSE_PROJECT_NAME=loancalc\\nEOF\\n./deploy.sh --build'",
+      "problemMatcher": []
+    }
+  ]
+}
