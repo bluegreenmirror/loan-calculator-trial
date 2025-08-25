@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   caddy:
     image: caddy:2.8
@@ -18,18 +17,28 @@ services:
     depends_on:
       - web
       - api
+    networks:
+      - loancalc
 
   web:
     build: ./web
     restart: unless-stopped
+    command: tail -f /dev/null
     volumes:
       - webdist:/site:ro
+    networks:
+      - loancalc
 
   api:
     build: ./api
     restart: unless-stopped
+    networks:
+      - loancalc
 
 volumes:
   caddy_data:
   caddy_config:
   webdist:
+
+networks:
+  loancalc:
