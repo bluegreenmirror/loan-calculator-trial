@@ -7,12 +7,15 @@ We welcome contributions from developers, product thinkers, and automation agent
 2. Clone locally and create a branch from `main`:
    ```bash
    git checkout -b feature/your-feature
+   ```
 3.	Copy .env.example to .env and adjust for dev:
    ```bash
    cp .env.example .env
+   ```
 4. Run the stack
    ```bash
    ./deploy.sh --build
+   ```
 5. Open http://localhost to test.
 
 ##Commit Style
