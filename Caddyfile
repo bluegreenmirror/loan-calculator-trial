@@ -1,26 +1,5 @@
-{$ADDR} {
-  {$AUTO_HTTPS}
-  encode zstd gzip
-
-  @static path_regexp static ^/(assets|static|favicon\.ico|robots\.txt|manifest\.json)
-
-  handle_path /api/* {
-    reverse_proxy api:8000
-  }
-
-  route {
-    root * /srv
-    try_files {path} /index.html
-    file_server
-  }
-
-  header {
-    {$HSTS_LINE}  # blank in dev; set HSTS only in prod
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "DENY"
-    Referrer-Policy "no-referrer-when-downgrade"
-    Permissions-Policy "geolocation=(), microphone=(), camera=()"
-  }
-
-  {$TLS_DIRECTIVE} # blank in dev; `tls ${EMAIL}` in prod
+http://localhost {
+  reverse_proxy /api/* api:8000
+  root * /srv
+  file_server
 }

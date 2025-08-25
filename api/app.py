@@ -48,21 +48,35 @@ def health():
 
 @app.post("/api/quote", response_model=QuoteResp)
 def quote(q: QuoteReq):
-    taxable_base = max(q.vehicle_price - q.trade_in_value, 0)
-    taxes = taxable_base * q.tax_rate
-    principal = max(q.vehicle_price + taxes + q.fees - q.down_payment - q.trade_in_value, 0)
-    r = q.apr/100/12
+    # Corrected calculation
+    amount_after_trade_in = q.vehicle_price - q.trade_in_value
+    taxes = amount_after_trade_in * q.tax_rate
+    principal = amount_after_trade_in + taxes + q.fees - q.down_payment
+    principal = max(principal, 0)
+
+    if q.term_months <= 0:
+        return QuoteResp(
+            amount_financed=round(principal, 2),
+            monthly_payment=0,
+            total_interest=0,
+            total_cost=round(principal, 2)
+        )
+
+    r = q.apr / 100 / 12
     if r == 0:
         monthly = principal / q.term_months
     else:
         monthly = principal * (r * (1 + r)**q.term_months) / ((1 + r)**q.term_months - 1)
-    total = monthly * q.term_months
+
+    total_cost = monthly * q.term_months
+    total_interest = total_cost - principal
+
     return QuoteResp(
         amount_financed=round(principal, 2),
         monthly_payment=round(monthly, 2),
-        total_interest=round(max(total - principal, 0), 2),
-        total_cost=round(total, 2)
-)
+        total_interest=round(max(total_interest, 0), 2),
+        total_cost=round(total_cost, 2)
+    )
 
 class LeadReq(BaseModel):
     name: str
