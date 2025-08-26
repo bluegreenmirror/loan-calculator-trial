@@ -41,20 +41,11 @@ function updateChart(principal, interest) {
           borderWidth: 0
         }]
       },
-      options: {
-        animation: {
-          duration: 1000,
-          easing: 'easeOutElastic',
-          animateRotate: true,
-          animateScale: true
-        }
-      }
+      options: { animation: false }
     });
   } else {
     costChart.data.datasets[0].data = [principal, interest];
-    costChart.options.animation.easing = 'easeOutElastic';
-    costChart.options.animation.duration = 1000;
-    costChart.update();
+    costChart.update('none');
   }
 
   canvas.classList.remove('bounce');
