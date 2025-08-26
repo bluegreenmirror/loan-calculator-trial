@@ -1,0 +1,37 @@
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+(
+  ^/\.git/
+  | ^/web/dist/
+)
+'''
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+extend-exclude = ["web/dist"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "W",   # pycodestyle warnings
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+]
+ignore = [
+  "E203",  # whitespace before ':' (compat with Black)
+  "E501",  # line length handled by Black
+]
+per-file-ignores = {}
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mdformat]
+wrap = 88
+extensions = ["gfm"]

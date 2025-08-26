@@ -3,6 +3,7 @@
 Fast, responsive loan payment calculator for autos, RVs, motorcycles, and jet skis — with lead‑gen and affiliate tracking. Fully containerized and ready to deploy.
 
 ## Features
+
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
 - 📊 **Cost breakdown chart**: smooth 3D pie chart with a CSS bounce effect highlighting principal vs interest.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
@@ -13,6 +14,7 @@ Fast, responsive loan payment calculator for autos, RVs, motorcycles, and jet sk
 - 🤓 **Dev/Prod toggles**: via `.env` + Caddyfile placeholders.
 
 ## Quick Start
+
 ```bash
 # Clone the repo
 git clone https://github.com/bluegreenmirror/loan-calculator-trial
@@ -35,44 +37,48 @@ cp .env.example .env
 For production, set `ADDR=${DOMAIN}`, `TLS_DIRECTIVE=tls ${EMAIL}`, and remove `AUTO_HTTPS` and `HSTS_LINE` from `.env`.
 
 ## API
+
 Base URL in dev: `http://localhost`
 
-- **Health**
+- Health:
   ```bash
   curl -s http://localhost/api/health
   ```
-- **Quote**
+- Quote (POST JSON):
   ```bash
   curl -s http://localhost/api/quote -X POST -H 'content-type: application/json' \
     -d '{"vehicle_price":35000,"down_payment":3000,"apr":6.9,"term_months":60,"tax_rate":0.095,"fees":495,"trade_in_value":0}'
   ```
-- **Leads**
+- Leads (POST JSON):
   ```bash
   curl -s http://localhost/api/leads -X POST -H 'content-type: application/json' \
     -d '{"name":"Jane Doe","email":"jane@example.com","phone":"415-555-1212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
   ```
-- **Affiliate tracking** (future)
+- Affiliate tracking (POST JSON):
   ```bash
-  curl -s "http://localhost/api/track?affiliate=partnerX"
+  curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
+    -d '{"affiliate":"partnerX"}'
   ```
 
 ## Front‑end
+
 - Modular static assets in `web/dist` (`index.html`, `style.css`, `app.js`)
 - Footer links to legal pages (`privacy.html`, `terms.html`)
 - The lead form (to be added) will auto-capture `affiliate`/UTM parameters from the page URL and submit them with the lead payload.
 - Calculator presets update APR and term per vehicle type.
 
 ## Environment variables
+
 All settings live in `.env`:
 
-| var              | dev                  | prod                    | note                                |
-|------------------|----------------------|-------------------------|--------------------------------------|
-| `ADDR`           | `http://localhost`   | `${DOMAIN}`             | Caddy site address                  |
-| `AUTO_HTTPS`     | `auto_https off`     | *(unset)*               | disable TLS in dev                  |
-| `TLS_DIRECTIVE`  | *(unset)*            | `tls ${EMAIL}`          | prod TLS via Let’s Encrypt          |
-| `HSTS_LINE`      | *(unset)*            | `Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"` | HSTS only in prod  |
-| `DOMAIN`         | *(optional)*         | your domain             | used by Caddy TLS                   |
-| `EMAIL`          | *(optional)*         | admin@yourdomain        | used by Caddy TLS                   |
+| var             | dev                | prod                                                                       | note                       |
+| --------------- | ------------------ | -------------------------------------------------------------------------- | -------------------------- |
+| `ADDR`          | `http://localhost` | `${DOMAIN}`                                                                | Caddy site address         |
+| `AUTO_HTTPS`    | `auto_https off`   | *(unset)*                                                                  | disable TLS in dev         |
+| `TLS_DIRECTIVE` | *(unset)*          | `tls ${EMAIL}`                                                             | prod TLS via Let’s Encrypt |
+| `HSTS_LINE`     | *(unset)*          | `Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"` | HSTS only in prod          |
+| `DOMAIN`        | *(optional)*       | your domain                                                                | used by Caddy TLS          |
+| `EMAIL`         | *(optional)*       | admin@yourdomain                                                           | used by Caddy TLS          |
 
 ## CORS configuration
 
@@ -83,18 +89,42 @@ The API exposes configuration for cross‑origin requests via the `ALLOWED_ORIGI
 If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by default to reduce the risk of malicious sites interacting with the service.
 
 ## Deploying
+
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
 1. Point DNS to your server.
-2. In `.env`, set:
+1. In `.env`, set:
    ```
    ADDR=${DOMAIN}
    TLS_DIRECTIVE=tls ${EMAIL}
    ```
    and remove `AUTO_HTTPS` and `HSTS_LINE`.
-3. Run `./deploy.sh --build`.
+1. Run `./deploy.sh --build`.
+
+## Linting & Formatting
+
+- Tools: `ruff` (Python), `black` (Python), `yamllint` (YAML), `mdformat` (Markdown).
+- Local usage:
+  ```bash
+  # Install tools (one-time)
+  pip install -r requirements-dev.txt || pip install ruff black yamllint mdformat mdformat-gfm
+
+  # Check everything
+  make lint
+
+  # Auto-format Python and Markdown
+  make format
+  ```
+- Build-time check via Docker:
+  ```bash
+  # Runs all linters at image build; fails on issues
+  docker compose build lint
+  # or
+  make lint-docker
+  ```
 
 ## Repository layout
+
 ```
 .
 ├─ api/
@@ -114,23 +144,12 @@ Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 ```
 
 ## Roadmap
+
 - Add lead form to front‑end and connect to `/api/leads`.
-- Add `/api/track` endpoint and JS to record affiliate clicks.
+- Add JS to record affiliate clicks via `/api/track`.
 - Support additional asset classes (boats, heavy equipment).
 - Provide dealership analytics and export functionality.
-=======
-## API endpoints
-
-- `GET /api/health` – service health check.
-- `POST /api/quote` – compute financing details.
-- `POST /api/leads` – store submitted leads.
-- `POST /api/track` – log affiliate clicks with a timestamp.
-
-## Affiliate tracking
-
-The frontend captures `aff` and common UTM query parameters. When an affiliate ID
-is present it is sent to the backend `/api/track` endpoint and stored in
-`localStorage` for later use.
 
 ## Contributing
-See `CONTRIBUTING.md` for commit conventions and setup. See `docs/agents.md` if you’re using automation to generate PRs.
+
+See `CONTRIBUTING.md` for commit conventions and setup. See `AGENTS.md` if you’re using automation to generate PRs.
