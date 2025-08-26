@@ -316,6 +316,24 @@ body {
   font-size: 1.1rem;
 }
 
+.digit-wrapper {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  position: relative;
+}
+
+.digits {
+  display: block;
+  will-change: transform;
+}
+
+.digit {
+  display: block;
+  height: 1em;
+  line-height: 1em;
+}
+
 .chart-section {
   padding: 24px;
   border-top: 1px solid var(--border);
