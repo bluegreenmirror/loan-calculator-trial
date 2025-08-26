@@ -13,6 +13,26 @@ if (aff) {
   });
 }
 
+const presets = {
+  auto: { apr: 10, term: 5 },
+  rv: { apr: 8, term: 15 },
+  moto: { apr: 12, term: 5 },
+  ski: { apr: 9, term: 3 }
+};
+
+function applyPreset(type) {
+  const preset = presets[type];
+  if (preset) {
+    document.getElementById('apr').value = preset.apr;
+    document.getElementById('term').value = preset.term;
+    document.getElementById('years').checked = true;
+  }
+}
+
+document.getElementById('vehicle').addEventListener('change', (e) => {
+  applyPreset(e.target.value);
+});
+
 function pmnt(principal, aprPct, n) {
   const r = (aprPct/100)/12;
   if (r === 0) return principal / n;
@@ -142,6 +162,7 @@ function openLeadModal() {
   document.getElementById('lead-modal').classList.add('show');
   // Pre-fill price from calculator
   document.getElementById('lead-price').value = document.getElementById('price').value;
+  document.getElementById('lead-vehicle').value = document.getElementById('vehicle').value;
 }
 
 function closeLeadModal() {
@@ -229,4 +250,5 @@ document.getElementById('lead-btn').addEventListener('click', () => {
 document.getElementById('lead-form').addEventListener('submit', handleLeadSubmission);
 
 // Initialize with default values
+applyPreset(document.getElementById('vehicle').value);
 calc();
