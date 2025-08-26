@@ -28,7 +28,8 @@ let costChart;
 function updateChart(principal, interest) {
   if (principal + interest === 0) return;
 
-  const ctx = document.getElementById('cost-chart').getContext('2d');
+  const canvas = document.getElementById('cost-chart');
+  const ctx = canvas.getContext('2d');
   if (!costChart) {
     costChart = new Chart(ctx, {
       type: 'pie',
@@ -42,14 +43,23 @@ function updateChart(principal, interest) {
       },
       options: {
         animation: {
-          duration: 500
+          duration: 1000,
+          easing: 'easeOutElastic',
+          animateRotate: true,
+          animateScale: true
         }
       }
     });
   } else {
     costChart.data.datasets[0].data = [principal, interest];
+    costChart.options.animation.easing = 'easeOutElastic';
+    costChart.options.animation.duration = 1000;
     costChart.update();
   }
+
+  canvas.classList.remove('bounce');
+  void canvas.offsetWidth;
+  canvas.classList.add('bounce');
 }
 
 function calc(){
