@@ -1,0 +1,5 @@
+black==24.8.0
+ruff==0.6.4
+yamllint==1.35.1
+mdformat==0.7.17
+mdformat-gfm==0.3.6

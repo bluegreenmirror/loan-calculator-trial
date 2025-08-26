@@ -1,14 +1,10 @@
-   
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
-
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
-from datetime import datetime
 import json
 import os
+from datetime import datetime
 
-
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
 
@@ -26,7 +22,6 @@ app.add_middleware(
 )
 
 
-
 class QuoteReq(BaseModel):
     vehicle_price: float = Field(..., gt=0)
     down_payment: float = 0
@@ -36,15 +31,18 @@ class QuoteReq(BaseModel):
     fees: float = 0.0
     trade_in_value: float = 0.0
 
+
 class QuoteResp(BaseModel):
     amount_financed: float
     monthly_payment: float
     total_interest: float
     total_cost: float
 
+
 @app.get("/api/health")
 def health():
     return {"ok": True}
+
 
 @app.post("/api/quote", response_model=QuoteResp)
 def quote(q: QuoteReq):
@@ -59,14 +57,16 @@ def quote(q: QuoteReq):
             amount_financed=round(principal, 2),
             monthly_payment=0,
             total_interest=0,
-            total_cost=round(principal, 2)
+            total_cost=round(principal, 2),
         )
 
     r = q.apr / 100 / 12
     if r == 0:
         monthly = principal / q.term_months
     else:
-        monthly = principal * (r * (1 + r)**q.term_months) / ((1 + r)**q.term_months - 1)
+        monthly = (
+            principal * (r * (1 + r) ** q.term_months) / ((1 + r) ** q.term_months - 1)
+        )
 
     total_cost = monthly * q.term_months
     total_interest = total_cost - principal
@@ -75,19 +75,22 @@ def quote(q: QuoteReq):
         amount_financed=round(principal, 2),
         monthly_payment=round(monthly, 2),
         total_interest=round(max(total_interest, 0), 2),
-        total_cost=round(total_cost, 2)
+        total_cost=round(total_cost, 2),
     )
+
 
 class LeadReq(BaseModel):
     name: str
     email: str
-    phone: Optional[str] = None
-    vehicle_type: Optional[str] = None
-    price: Optional[float] = None
-    affiliate: Optional[str] = None
+    phone: str | None = None
+    vehicle_type: str | None = None
+    price: float | None = None
+    affiliate: str | None = None
+
 
 class LeadResp(BaseModel):
     message: str
+
 
 @app.post("/api/leads", response_model=LeadResp)
 def create_lead(lead: LeadReq):
@@ -95,7 +98,7 @@ def create_lead(lead: LeadReq):
     lead_entry = lead.dict()
     lead_entry["timestamp"] = datetime.utcnow().isoformat()
     if os.path.exists(leads_file):
-        with open(leads_file, "r") as f:
+        with open(leads_file) as f:
             data = json.load(f)
     else:
         data = []
@@ -118,7 +121,7 @@ def track_click(track: TrackReq):
     track_file = "tracks.json"
     entry = {"affiliate": track.affiliate, "timestamp": datetime.utcnow().isoformat()}
     if os.path.exists(track_file):
-        with open(track_file, "r") as f:
+        with open(track_file) as f:
             data = json.load(f)
     else:
         data = []
@@ -126,4 +129,3 @@ def track_click(track: TrackReq):
     with open(track_file, "w") as f:
         json.dump(data, f)
     return TrackResp(message="Tracked")
-

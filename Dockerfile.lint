@@ -1,0 +1,30 @@
+FROM python:3.12-slim AS lint
+
+ENV PIP_NO_CACHE_DIR=1
+WORKDIR /src
+
+# Install system deps for yamllint if needed (none heavy) and git for some tools
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install linters/formatters (Python-based to avoid Node runtime)
+RUN pip install --no-cache-dir \
+    black==24.8.* \
+    ruff==0.6.* \
+    yamllint==1.35.* \
+    mdformat==0.7.* mdformat-gfm==0.3.*
+
+# Copy repo
+COPY . /src
+
+# Run checks at build time; any failure will fail the image build
+RUN echo "Running Python format check (black)" && \
+    black --check api && \
+    echo "Running Python lint (ruff)" && \
+    ruff check api && \
+    echo "Running YAML lint (yamllint)" && \
+    yamllint -s . && \
+    echo "Running Markdown format check (mdformat)" && \
+    mdformat --check README.md docs || (echo "Hint: run 'make format' locally to autofix." && false)
+
