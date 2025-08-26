@@ -41,7 +41,13 @@ function updateChart(principal, interest) {
           borderWidth: 0
         }]
       },
-      options: { animation: false }
+      options: {
+        animation: false,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
     });
   } else {
     costChart.data.datasets[0].data = [principal, interest];
