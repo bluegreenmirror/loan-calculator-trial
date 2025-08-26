@@ -54,7 +54,7 @@ function updateChart(principal, interest) {
     costChart = new Chart(ctx, {
       type: 'pie',
       data: {
-        labels: ['Total loan amount paid', 'Total interest paid'],
+        labels: ['Total vehicle loan amount paid', 'Total interest paid'],
         datasets: [{
           data: [principal, interest],
           backgroundColor: ['#d4af37', '#10b981'],
@@ -98,7 +98,7 @@ function calc(){
   setTimeout(() => {
     try {
       if (price <= 0) {
-        throw new Error('Loan amount must be greater than 0');
+        throw new Error('Vehicle loan amount must be greater than 0');
       }
       
       if (apr < 0 || apr > 100) {
@@ -106,7 +106,7 @@ function calc(){
       }
       
       if (termMonths <= 0) {
-        throw new Error('Loan term must be greater than 0');
+        throw new Error('Vehicle loan term must be greater than 0');
       }
 
       const principal = Math.max(price + fees - down, 0);
@@ -204,7 +204,7 @@ async function handleLeadSubmission(e) {
       document.getElementById('modal-content').innerHTML = `
         <div class="success-message">
           <h4>Thank You!</h4>
-          <p>Your application has been submitted successfully. We'll be in touch with you shortly with personalized loan offers.</p>
+          <p>Your application has been submitted successfully. We'll be in touch shortly with personalized vehicle loan offers.</p>
         </div>
       `;
       
