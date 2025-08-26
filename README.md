@@ -4,6 +4,7 @@ Fast, responsive loan payment calculator for autos, RVs, motorcycles, and jet sk
 
 ## Features
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
+- 📊 **Animated cost breakdown**: pie chart updates smoothly with principal vs interest.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
 - 👨‍⚖️ **Lead capture**: name/email/phone (+ affiliate/UTM captured automatically).
 - 🤝 **Affiliate tracking**: records click metadata; passthrough to form.

@@ -19,25 +19,37 @@ function pmnt(principal, aprPct, n) {
   return principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
 }
 
-function fmt(n){ 
-  return n.toLocaleString(undefined, {style:'currency', currency:'USD'}) 
+function fmt(n){
+  return n.toLocaleString(undefined, {style:'currency', currency:'USD'})
 }
 
+let costChart;
+
 function updateChart(principal, interest) {
-  const total = principal + interest;
-  if (total === 0) return;
-  
-  const principalPercent = (principal / total) * 100;
-  const interestPercent = (interest / total) * 100;
-  
-  const principalSlice = document.getElementById('principal-slice');
-  const interestSlice = document.getElementById('interest-slice');
-  
-  const circumference = 2 * Math.PI * 37.5;
-  
-  principalSlice.style.strokeDasharray = `${(principalPercent / 100) * circumference} ${circumference}`;
-  interestSlice.style.strokeDasharray = `${(interestPercent / 100) * circumference} ${circumference}`;
-  interestSlice.style.strokeDashoffset = `-${(principalPercent / 100) * circumference}`;
+  if (principal + interest === 0) return;
+
+  const ctx = document.getElementById('cost-chart').getContext('2d');
+  if (!costChart) {
+    costChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Total loan amount paid', 'Total interest paid'],
+        datasets: [{
+          data: [principal, interest],
+          backgroundColor: ['#d4af37', '#10b981'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        animation: {
+          duration: 500
+        }
+      }
+    });
+  } else {
+    costChart.data.datasets[0].data = [principal, interest];
+    costChart.update();
+  }
 }
 
 function calc(){
