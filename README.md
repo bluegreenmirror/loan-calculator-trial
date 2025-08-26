@@ -56,8 +56,9 @@ Base URL in dev: `http://localhost`
   ```
 
 ## Front‑end
-- Static `web/dist/index.html` is mobile‑first, loads instantly.
-- The lead form (to be added) will auto‑capture `affiliate`/UTM parameters from the page URL and submit them with the lead payload.
+- Modular static assets in `web/dist` (`index.html`, `style.css`, `app.js`)
+- Footer links to legal pages (`privacy.html`, `terms.html`)
+- The lead form (to be added) will auto-capture `affiliate`/UTM parameters from the page URL and submit them with the lead payload.
 - Calculator presets update APR and term per vehicle type.
 
 ## Environment variables
