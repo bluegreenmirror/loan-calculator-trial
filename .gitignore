@@ -33,3 +33,10 @@ docker-compose.override.yml
 
 # macOS
 .DS_Store
+# include built frontend assets
+!web/dist/
+!web/dist/index.html
+!web/dist/style.css
+!web/dist/app.js
+!web/dist/privacy.html
+!web/dist/terms.html
