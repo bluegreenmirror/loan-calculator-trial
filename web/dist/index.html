@@ -4,76 +4,883 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Loan Payment Calculator — Auto, RV, Motorcycle, Jet Ski</title>
-  <meta name="description" content="Clean, fast loan calculator with presets for cars, RVs, motorcycles, and jet skis."/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="description" content="Professional loan calculator with instant quotes for cars, RVs, motorcycles, and jet skis. Get prequalified offers in minutes."/>
+  <meta name="keywords" content="loan calculator, auto loan, RV loan, motorcycle loan, jet ski loan, financing calculator, monthly payment" />
+  <meta name="author" content="Loan Calculator" />
+  <meta property="og:title" content="Loan Payment Calculator — Auto, RV, Motorcycle, Jet Ski" />
+  <meta property="og:description" content="Professional loan calculator with instant quotes for cars, RVs, motorcycles, and jet skis. Get prequalified offers in minutes." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Loan Calculator" />
+  <meta name="twitter:description" content="Professional loan calculator with instant quotes for cars, RVs, motorcycles, and jet skis." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#0b0f14; color:#e9eef5 }
-    .container { max-width: 960px; margin: 0 auto; padding: 24px }
-    .card { background:#121821; border:1px solid #1a2230; border-radius:12px; padding:18px }
-    label { color:#9aa5b1; display:block; margin:8px 0 4px }
-    input, select, button { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #263042; background:#0f141c; color:#e9eef5 }
-    .grid { display:grid; gap:12px }
-    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr } }
-    .row { display:grid; grid-template-columns: 1fr auto; gap: 8px; align-items:center }
-    .kpi { display:flex; justify-content:space-between; background:#0f141c; border:1px solid #263042; border-radius:10px; padding:12px 14px }
-    .kpi .v { font-variant-numeric: tabular-nums; font-size: 1.4rem }
-    .btn-primary { background: linear-gradient(135deg, #4cc38a, #22c55e); color:#07210f; border:0; font-weight:600 }
+    :root {
+      --gold: #d4af37;
+      --gold-light: #f4e4a6;
+      --gold-dark: #b8941f;
+      --black: #1a1a1a;
+      --black-light: #2d2d2d;
+      --black-muted: #404040;
+      --green: #10b981;
+      --green-light: #d1fae5;
+      --green-dark: #059669;
+      --text-primary: #1a1a1a;
+      --text-secondary: #404040;
+      --text-muted: #666666;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f8f8;
+      --bg-tertiary: #f0f0f0;
+      --border: #e0e0e0;
+      --border-dark: #cccccc;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.15), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px 0;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--black);
+      margin: 0 0 8px 0;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header .date {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+    }
+
+    .calculator-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--black);
+      color: white;
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: inherit;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-light);
+    }
+
+    .form-group input:hover,
+    .form-group select:hover {
+      border-color: var(--border-dark);
+    }
+
+    .form-group input:invalid,
+    .form-group select:invalid {
+      border-color: #dc2626;
+    }
+
+    .form-group input:invalid:focus,
+    .form-group select:invalid:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .radio-option input[type="radio"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .radio-option label {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .expandable-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 16px;
+    }
+
+    .expandable-link:hover {
+      text-decoration: underline;
+    }
+
+    .expandable-content {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .expandable-content.show {
+      display: block;
+    }
+
+    .btn-calculate {
+      width: 100%;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--black);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 24px;
+    }
+
+    .btn-calculate:hover {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-calculate:active {
+      transform: translateY(0);
+    }
+
+    .btn-calculate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .calculation-status {
+      text-align: center;
+      margin: 16px 0;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .calculation-status.show {
+      display: block;
+    }
+
+    .calculation-status.success {
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .calculation-status.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .results-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .monthly-payment {
+      text-align: center;
+      padding: 32px 24px;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      border-bottom: 1px solid var(--border);
+    }
+
+    .monthly-payment .amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--black);
+      margin: 0;
+    }
+
+    .monthly-payment .label {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin: 8px 0 0 0;
+    }
+
+    .results-details {
+      padding: 24px;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-item .label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .result-item .value {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+    }
+
+    .chart-section {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 20px 0;
+      text-align: center;
+    }
+
+    .pie-chart {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    .pie-chart svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .pie-chart .slice {
+      fill: none;
+      stroke-width: 75;
+      stroke-linecap: round;
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .lead-section {
+      background: var(--black);
+      color: white;
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .lead-section h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: white;
+      margin: 0 0 16px 0;
+    }
+
+    .lead-section p {
+      color: #e0e0e0;
+      margin: 0 0 20px 0;
+      font-size: 1rem;
+    }
+
+    .lead-features {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+    }
+
+    .feature::before {
+      content: '✓';
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .btn-lead {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--black);
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-lead:hover {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .amortization-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 20px;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .amortization-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Lead Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      background: var(--black);
+      color: white;
+      padding: 24px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      position: relative;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+      padding: 32px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: inherit;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-light);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 24px;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 32px;
+      color: var(--success);
+    }
+
+    .success-message h4 {
+      margin: 0 0 16px 0;
+      font-size: 1.5rem;
+      color: var(--success);
+    }
+
+    .success-message p {
+      margin: 0;
+      color: var(--text-secondary);
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .main-content {
+        gap: 20px;
+      }
+      
+      .monthly-payment .amount {
+        font-size: 2rem;
+      }
+      
+      .lead-features {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Loan Payment Calculator</h1>
-    <div class="card grid grid-2">
-      <div>
-        <label>Vehicle type</label>
-        <select id="veh">
-          <option value="auto">Auto</option>
-          <option value="rv">RV</option>
-          <option value="moto">Motorcycle</option>
-          <option value="ski">Jet Ski</option>
-        </select>
-
-        <label>Price ($)</label>
-        <input id="price" type="number" value="35000" />
-
-        <label>Down payment ($)</label>
-        <input id="down" type="number" value="3000" />
-
-        <label>Trade-in value ($)</label>
-        <input id="trade" type="number" value="0" />
-
-        <div class="grid grid-2">
-          <div>
-            <label>APR (%)</label>
-            <input id="apr" type="number" value="6.9" step="0.1" />
-          </div>
-          <div>
-            <label>Term (months)</label>
-            <input id="term" type="number" value="60" />
-          </div>
+    <header class="header">
+      <h1>Loan Calculator</h1>
+      <p class="date">Aug 21, 2025</p>
+    </header>
+    
+    <main class="main-content">
+      <!-- Left Column: Calculator Form -->
+      <div class="calculator-card">
+        <div class="card-header">
+          <h2>Loan Calculator</h2>
         </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="price">Loan amount</label>
+            <input id="price" type="number" value="10000" placeholder="Enter loan amount" />
+          </div>
 
-        <div class="grid grid-2">
-          <div>
-            <label>Tax rate</label>
-            <input id="tax" type="number" value="9.5" step="0.1" />
+          <div class="form-group">
+            <label for="term">Loan term</label>
+            <input id="term" type="number" value="5" placeholder="Enter term" />
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="months" name="term-unit" value="months" />
+                <label for="months">Months</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="years" name="term-unit" value="years" checked />
+                <label for="years">Years</label>
+              </div>
+            </div>
           </div>
-          <div>
-            <label>Fees ($)</label>
-            <input id="fees" type="number" value="495" />
+
+          <div class="form-group">
+            <label for="apr">Interest rate</label>
+            <input id="apr" type="number" value="10" step="0.1" placeholder="Enter interest rate" />
+            <span style="margin-left: 8px; color: var(--text-secondary);">%</span>
           </div>
+
+          <div class="expandable-link" onclick="toggleExpandable('extra-payments')">
+            <span>Optional: extra payments and fees</span>
+            <span class="expandable-icon">▼</span>
+          </div>
+          
+          <div class="expandable-content" id="extra-payments-content">
+            <div class="form-group">
+              <label for="down">Down payment</label>
+              <input id="down" type="number" value="0" placeholder="Enter down payment" />
+            </div>
+            <div class="form-group">
+              <label for="fees">Additional fees</label>
+              <input id="fees" type="number" value="0" placeholder="Enter fees" />
+            </div>
+          </div>
+
+          <button class="btn-calculate" id="calc">Calculate</button>
+          
+          <div class="calculation-status" id="calc-status"></div>
         </div>
-
-        <br/>
-        <button class="btn-primary" id="calc">Calculate</button>
       </div>
 
-      <div id="out">
-        <div class="kpi"><span>Amount financed</span><span class="v" id="fin">$0</span></div>
-        <div class="kpi"><span>Monthly payment</span><span class="v" id="pay">$0</span></div>
-        <div class="kpi"><span>Total interest</span><span class="v" id="int">$0</span></div>
-        <div class="kpi"><span>Total cost</span><span class="v" id="tot">$0</span></div>
+      <!-- Right Column: Results & Lead Generation -->
+      <div class="results-card">
+        <div class="monthly-payment">
+          <p class="amount" id="pay">$250.00</p>
+          <p class="label">Estimated monthly payment</p>
+        </div>
+
+        <div class="results-details">
+          <div class="result-item">
+            <span class="label">Total loan amount paid</span>
+            <span class="value" id="fin">$10,000.00</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Total interest paid</span>
+            <span class="value" id="int">$2,214.69</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Total cost of loan</span>
+            <span class="value" id="tot">$12,214.69</span>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <h3 class="chart-title">Cost Breakdown</h3>
+          <div class="pie-chart">
+            <svg viewBox="0 0 100 100">
+              <circle class="slice" cx="50" cy="50" r="37.5" stroke="#d4af37" stroke-dasharray="0 235.5" id="principal-slice"/>
+              <circle class="slice" cx="50" cy="50" r="37.5" stroke="#10b981" stroke-dasharray="0 0" id="interest-slice"/>
+            </svg>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: #d4af37;"></div>
+              <span>Total loan amount paid</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #10b981;"></div>
+              <span>Total interest paid</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lead-section">
+          <h3>Find the right personal loan for you</h3>
+          <p>Get prequalified offers from top lenders in minutes</p>
+          
+          <div class="lead-features">
+            <div class="feature">Prequalified offers in 2 minutes or less</div>
+            <div class="feature">No impact to your credit score</div>
+          </div>
+          
+          <button class="btn-lead" id="lead-btn">Find my best rate</button>
+        </div>
+
+        <div class="amortization-link" onclick="toggleExpandable('amortization')">
+          <span>Show amortization schedule</span>
+          <span class="expandable-icon">▼</span>
+        </div>
+        
+        <div class="expandable-content" id="amortization-content">
+          <p style="text-align: center; color: var(--text-secondary); padding: 20px;">
+            Detailed monthly breakdown coming soon...
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Lead Generation Modal -->
+    <div class="modal-overlay" id="lead-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Get Your Personalized Loan Quote</h3>
+          <button class="modal-close" onclick="closeLeadModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-content">
+          <form id="lead-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lead-name">First Name *</label>
+                <input id="lead-name" type="text" required placeholder="Enter your first name" />
+              </div>
+              <div class="form-group">
+                <label for="lead-lastname">Last Name *</label>
+                <input id="lead-lastname" type="text" required placeholder="Enter your last name" />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lead-email">Email Address *</label>
+                <input id="lead-email" type="email" required placeholder="Enter your email" />
+              </div>
+              <div class="form-group">
+                <label for="lead-phone">Phone Number</label>
+                <input id="lead-phone" type="tel" placeholder="Enter your phone number" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lead-vehicle">Vehicle Type</label>
+                <select id="lead-vehicle">
+                  <option value="auto">Auto</option>
+                  <option value="rv">RV</option>
+                  <option value="moto">Motorcycle</option>
+                  <option value="ski">Jet Ski</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="lead-price">Vehicle Price</label>
+                <input id="lead-price" type="number" placeholder="Enter vehicle price" />
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="lead-message">Additional Information</label>
+              <textarea id="lead-message" placeholder="Tell us about your financing needs, timeline, or any questions you have..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submit-lead">
+              <span id="submit-text">Submit Application</span>
+              <span id="submit-loading" class="loading" style="display: none;"></span>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
+
+    <footer class="footer">
+      <p>&copy; 2025 Loan Calculator. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </footer>
   </div>
 
 <script>
@@ -92,60 +899,205 @@ if (aff) {
   });
 }
 
-const presets = {
-  auto: { apr: 6.9, term: 60 },
-  rv:   { apr: 8.9, term: 120 },
-  moto: { apr: 7.9, term: 48 },
-  ski:  { apr: 9.9, term: 36 }
-};
-
 function pmnt(principal, aprPct, n) {
   const r = (aprPct/100)/12;
   if (r === 0) return principal / n;
   return principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
 }
-function fmt(n){ return n.toLocaleString(undefined, {style:'currency', currency:'USD'}) }
 
-function calc(){
-  const price = +priceEl.value || 0;
-  const down  = +downEl.value  || 0;
-  const trade = +tradeEl.value || 0;
-  const apr   = +aprEl.value   || 0;
-  const term  = +termEl.value  || 1;
-  const tax   = (+taxEl.value || 0)/100;
-  const fees  = +feesEl.value  || 0;
-
-  const taxableBase = Math.max(price - trade, 0);
-  const taxes = taxableBase * tax;
-  const principal = Math.max(price + taxes + fees - down - trade, 0);
-  const monthly = pmnt(principal, apr, term);
-  const total = monthly * term;
-  const interest = Math.max(total - principal, 0);
-
-  fin.textContent = fmt(principal);
-  pay.textContent = fmt(monthly);
-  int.textContent = fmt(interest);
-  tot.textContent = fmt(total);
+function fmt(n){ 
+  return n.toLocaleString(undefined, {style:'currency', currency:'USD'}) 
 }
 
-const veh = document.getElementById('veh');
-const priceEl = document.getElementById('price');
-const downEl = document.getElementById('down');
-const tradeEl = document.getElementById('trade');
-const aprEl = document.getElementById('apr');
-const termEl = document.getElementById('term');
-const taxEl = document.getElementById('tax');
-const feesEl = document.getElementById('fees');
-const fin = document.getElementById('fin');
-const pay = document.getElementById('pay');
-const int = document.getElementById('int');
-const tot = document.getElementById('tot');
+function updateChart(principal, interest) {
+  const total = principal + interest;
+  if (total === 0) return;
+  
+  const principalPercent = (principal / total) * 100;
+  const interestPercent = (interest / total) * 100;
+  
+  const principalSlice = document.getElementById('principal-slice');
+  const interestSlice = document.getElementById('interest-slice');
+  
+  const circumference = 2 * Math.PI * 37.5;
+  
+  principalSlice.style.strokeDasharray = `${(principalPercent / 100) * circumference} ${circumference}`;
+  interestSlice.style.strokeDasharray = `${(interestPercent / 100) * circumference} ${circumference}`;
+  interestSlice.style.strokeDashoffset = `-${(principalPercent / 100) * circumference}`;
+}
+
+function calc(){
+  const calcBtn = document.getElementById('calc');
+  const calcStatus = document.getElementById('calc-status');
+  
+  // Get values
+  const price = +document.getElementById('price').value || 0;
+  const term = +document.getElementById('term').value || 1;
+  const termUnit = document.querySelector('input[name="term-unit"]:checked').value;
+  const apr = +document.getElementById('apr').value || 0;
+  const down = +document.getElementById('down').value || 0;
+  const fees = +document.getElementById('fees').value || 0;
+
+  // Convert term to months if needed
+  const termMonths = termUnit === 'years' ? term * 12 : term;
+
+  // Show loading state
+  calcBtn.disabled = true;
+  calcBtn.textContent = 'Calculating...';
+  calcStatus.className = 'calculation-status';
+  calcStatus.textContent = '';
+
+  // Simulate calculation delay for better UX
+  setTimeout(() => {
+    try {
+      if (price <= 0) {
+        throw new Error('Loan amount must be greater than 0');
+      }
+      
+      if (apr < 0 || apr > 100) {
+        throw new Error('Interest rate must be between 0 and 100');
+      }
+      
+      if (termMonths <= 0) {
+        throw new Error('Loan term must be greater than 0');
+      }
+
+      const principal = Math.max(price + fees - down, 0);
+      const monthly = pmnt(principal, apr, termMonths);
+      const total = monthly * termMonths;
+      const interest = Math.max(total - principal, 0);
+
+      document.getElementById('fin').textContent = fmt(principal);
+      document.getElementById('pay').textContent = fmt(monthly);
+      document.getElementById('int').textContent = fmt(interest);
+      document.getElementById('tot').textContent = fmt(total);
+      
+      updateChart(principal, interest);
+      
+      // Show success status
+      calcStatus.className = 'calculation-status show success';
+      calcStatus.textContent = 'Calculation completed successfully!';
+      
+    } catch (error) {
+      // Show error status
+      calcStatus.className = 'calculation-status show error';
+      calcStatus.textContent = error.message;
+      
+      // Reset results
+      document.getElementById('fin').textContent = '$0';
+      document.getElementById('pay').textContent = '$0';
+      document.getElementById('int').textContent = '$0';
+      document.getElementById('tot').textContent = '$0';
+    } finally {
+      // Reset button state
+      calcBtn.disabled = false;
+      calcBtn.textContent = 'Calculate';
+    }
+  }, 500);
+}
+
+function toggleExpandable(sectionId) {
+  const content = document.getElementById(sectionId + '-content');
+  const icon = content.previousElementSibling.querySelector('.expandable-icon');
+  
+  content.classList.toggle('show');
+  icon.style.transform = content.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+// Lead generation functions
+function openLeadModal() {
+  document.getElementById('lead-modal').classList.add('show');
+  // Pre-fill price from calculator
+  document.getElementById('lead-price').value = document.getElementById('price').value;
+}
+
+function closeLeadModal() {
+  document.getElementById('lead-modal').classList.remove('show');
+  // Reset form
+  document.getElementById('lead-form').reset();
+  // Reset modal content
+  document.getElementById('modal-content').innerHTML = document.getElementById('modal-content').innerHTML;
+  // Re-attach event listener
+  document.getElementById('lead-form').addEventListener('submit', handleLeadSubmission);
+}
+
+async function handleLeadSubmission(e) {
+  e.preventDefault();
+  
+  const submitBtn = document.getElementById('submit-lead');
+  const submitText = document.getElementById('submit-text');
+  const submitLoading = document.getElementById('submit-loading');
+  
+  // Show loading state
+  submitBtn.disabled = true;
+  submitText.style.display = 'none';
+  submitLoading.style.display = 'inline-block';
+  
+  try {
+    const formData = {
+      name: document.getElementById('lead-name').value + ' ' + document.getElementById('lead-lastname').value,
+      email: document.getElementById('lead-email').value,
+      phone: document.getElementById('lead-phone').value || null,
+      vehicle_type: document.getElementById('lead-vehicle').value,
+      price: parseFloat(document.getElementById('lead-price').value) || null,
+      affiliate: localStorage.getItem('affiliate') || null
+    };
+    
+    const response = await fetch('/api/leads', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+    
+    if (response.ok) {
+      // Show success message
+      document.getElementById('modal-content').innerHTML = `
+        <div class="success-message">
+          <h4>Thank You!</h4>
+          <p>Your application has been submitted successfully. We'll be in touch with you shortly with personalized loan offers.</p>
+        </div>
+      `;
+      
+      // Close modal after 3 seconds
+      setTimeout(() => {
+        closeLeadModal();
+      }, 3000);
+    } else {
+      throw new Error('Failed to submit lead');
+    }
+  } catch (error) {
+    console.error('Error submitting lead:', error);
+    // Show error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = 'There was an error submitting your application. Please try again.';
+    
+    const modalContent = document.getElementById('modal-content');
+    modalContent.insertBefore(errorDiv, modalContent.firstChild);
+    
+    // Reset button state
+    submitBtn.disabled = false;
+    submitText.style.display = 'inline';
+    submitLoading.style.display = 'none';
+  }
+}
+
+// Event listeners
 document.getElementById('calc').addEventListener('click', calc);
-veh.addEventListener('change', () => {
-  aprEl.value = presets[veh.value].apr;
-  termEl.value = presets[veh.value].term;
+
+// Lead button listener
+document.getElementById('lead-btn').addEventListener('click', () => {
+  openLeadModal();
 });
+
+// Lead form submission
+document.getElementById('lead-form').addEventListener('submit', handleLeadSubmission);
+
+// Initialize with default values
 calc();
 </script>
 </body>
 </html>
+
