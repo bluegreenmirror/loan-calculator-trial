@@ -62,7 +62,8 @@ function animateNumber(el, value) {
         digit.textContent = d;
         digits.appendChild(digit);
       }
-      digits.style.transform = `translateY(-${parseInt(oldCh, 10) * 100}%)`;
+      const startDigit = /^\d$/.test(oldCh) ? parseInt(oldCh, 10) : 0;
+      digits.style.transform = `translateY(-${startDigit * 10}%)`;
       wrapper.appendChild(digits);
       frag.appendChild(wrapper);
     } else {
@@ -81,7 +82,7 @@ function animateNumber(el, value) {
       if (/\d/.test(ch)) {
         const digits = digitElems[idx++];
         digits.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.4, 1)';
-        digits.style.transform = `translateY(-${parseInt(ch, 10) * 100}%)`;
+        digits.style.transform = `translateY(-${parseInt(ch, 10) * 10}%)`;
       }
     }
   });
