@@ -13,19 +13,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - webdist:/srv:ro
+      - ./web/dist:/srv:ro
     depends_on:
-      - web
       - api
-    networks:
-      - loancalc
-
-  web:
-    build: ./web
-    restart: unless-stopped
-    command: tail -f /dev/null
-    volumes:
-      - webdist:/site:ro
     networks:
       - loancalc
 
@@ -38,7 +28,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  webdist:
 
 networks:
   loancalc:
