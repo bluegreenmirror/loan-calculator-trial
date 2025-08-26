@@ -1,12 +1,12 @@
-# Loan Calculator — Product Requirements Document (PRD)
+# Vehicle Loan Calculator — Product Requirements Document (PRD)
 
 ## Vision
 
-Provide a **fast, responsive, and extensible loan calculator** that can generate monthly payment estimates for different vehicle types (autos, RVs, motorcycles, jet skis). Monetize the calculator through **affiliate partnerships**, **lead-generation forms**, and **API access for dealerships**.
+Provide a **fast, responsive, and extensible vehicle loan calculator** that can generate monthly payment estimates for different vehicle types (autos, RVs, motorcycles, jet skis). Monetize the calculator through **affiliate partnerships**, **lead-generation forms**, and **API access for dealerships**.
 
 ## Goals
 
-- **Core MVP**: Clean UI loan calculator, responsive and mobile-first.
+- **Core MVP**: Clean UI vehicle loan calculator, responsive and mobile-first.
 - **Extensibility**: Support new asset types with minimal code changes.
 - **Monetization**: Affiliate link integration and lead form capture.
 - **APIs**: Secure, developer-friendly endpoints for dealerships to integrate.
