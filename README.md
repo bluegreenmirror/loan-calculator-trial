@@ -81,11 +81,13 @@ Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
 
 All settings live in `.env`:
 
-| var           | dev                 | prod                  | note                         |
-| ------------- | ------------------- | --------------------- | ---------------------------- |
-| `DOMAIN`      | `localhost`         | your domain           | Caddy site address           |
-| `EMAIL`       | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
-| `PERSIST_DIR` | `/data`             | `/data` or custom dir | Persisted lead/track storage |
+| var             | dev                 | prod                  | note                         |
+| --------------- | ------------------- | --------------------- | ---------------------------- |
+| `DOMAIN`        | `example.com`       | your domain           | Used by deploy script        |
+| `EMAIL`         | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
+| `ADDR`          | `:80`               | `${DOMAIN}`           | Caddy site address           |
+| `TLS_DIRECTIVE` | _(empty)_           | `tls ${EMAIL}`        | Enables HTTPS in prod        |
+| `PERSIST_DIR`   | `/data`             | `/data` or custom dir | Persisted lead/track storage |
 
 ## CORS configuration
 
@@ -111,8 +113,6 @@ Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --buil
    ADDR=${DOMAIN}
    TLS_DIRECTIVE=tls ${EMAIL}
    ```
-
-   and remove `AUTO_HTTPS` and `HSTS_LINE`.
 
 1. Run `./deploy.sh --build`.
 
