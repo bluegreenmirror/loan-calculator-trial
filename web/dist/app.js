@@ -68,6 +68,7 @@ function animateNumber(el, value) {
       frag.appendChild(wrapper);
     } else {
       const span = document.createElement('span');
+      span.className = 'digit-symbol';
       span.textContent = newCh;
       frag.appendChild(span);
     }
