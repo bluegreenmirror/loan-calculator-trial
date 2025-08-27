@@ -433,6 +433,12 @@ body {
   font-size: 1rem;
 }
 
+.lead-section .disclaimer {
+  color: var(--text-secondary);
+  margin-top: 12px;
+  font-size: 0.875rem;
+}
+
 .lead-features {
   display: flex;
   justify-content: center;

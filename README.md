@@ -2,6 +2,8 @@
 
 Jump‑start your next ride with a fast, responsive vehicle loan payment calculator for autos, RVs, motorcycles, and jet skis — complete with lead‑gen and affiliate tracking. Fully containerized, tuned for growth, and ready to deploy. Calculate, compare, and cruise toward your dream vehicle today!
 
+> **Note:** This project is for demo purposes only as of Aug 25, 2025 and may not result in offers or responses.
+
 ## Features
 
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
