@@ -59,8 +59,6 @@ Base URL in dev: `http://localhost`
     -d '{"name":"Jane Doe","email":"jane@example.com","phone":"+14155551212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
   ```
 
-````
-
 Leads are stored in `leads.json` and tracking events in `tracks.json`, both inside `PERSIST_DIR` (default `/data`). Lead names must be non-empty and phone numbers (if provided) must include 10–15 digits with an optional leading `+`. Affiliate identifiers must not be empty. Invalid submissions are rejected and not written to disk.
 
 - Affiliate tracking (POST JSON):
@@ -68,7 +66,7 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
   ```bash
   curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
     -d '{"affiliate":"partnerX"}'
-````
+  ```
 
 ## Front‑end
 
@@ -81,11 +79,13 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
 
 All settings live in `.env`:
 
-| var           | dev                 | prod                  | note                         |
-| ------------- | ------------------- | --------------------- | ---------------------------- |
-| `DOMAIN`      | `localhost`         | your domain           | Caddy site address           |
-| `EMAIL`       | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
-| `PERSIST_DIR` | `/data`             | `/data` or custom dir | Persisted lead/track storage |
+| var             | dev                 | prod                  | note                         |
+| --------------- | ------------------- | --------------------- | ---------------------------- |
+| `DOMAIN`        | `example.com`       | your domain           | Used by deploy script        |
+| `EMAIL`         | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
+| `ADDR`          | `:80`               | `${DOMAIN}`           | Caddy site address           |
+| `TLS_DIRECTIVE` | _(empty)_           | `tls ${EMAIL}`        | Enables HTTPS in prod        |
+| `PERSIST_DIR`   | `/data`             | `/data` or custom dir | Persisted lead/track storage |
 
 ## CORS configuration
 
@@ -112,8 +112,6 @@ Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --buil
    TLS_DIRECTIVE=tls ${EMAIL}
    ```
 
-   and remove `AUTO_HTTPS` and `HSTS_LINE`.
-
 1. Run `./deploy.sh --build`.
 
 ## Testing
@@ -129,16 +127,20 @@ make verify  # or `make test` to run tests only
 
 ## Linting & Formatting
 
-- Tools: `ruff` (Python), `black` (Python), `yamllint` (YAML), `mdformat` (Markdown).
+- Tools: `ruff` (Python), `black` (Python), `mypy` with the `pydantic.mypy` plugin, `yamllint` (YAML), `mdformat` (Markdown).
 
 - Local usage:
 
   ```bash
   # Install tools (one-time)
-  pip install -r requirements-dev.txt || pip install ruff black yamllint mdformat mdformat-gfm
+  pip install -r requirements-dev.txt || pip install ruff black mypy yamllint mdformat mdformat-gfm pre-commit
+
+  # Install git hooks
+  pre-commit install
 
   # Check everything
   make lint
+  pre-commit run --all-files
 
   # Auto-format Python and Markdown
   make format
