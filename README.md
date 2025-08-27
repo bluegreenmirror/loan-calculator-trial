@@ -151,6 +151,10 @@ pytest
   make lint-docker
   ```
 
+## Continuous Integration
+
+Pull requests trigger GitHub Actions to run linters and build all Docker images.
+
 ## Repository layout
 
 ```md
