@@ -63,10 +63,10 @@ Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
 
 - Affiliate tracking (POST JSON):
 
-    ```bash
-    curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
-      -d '{"affiliate":"partnerX"}'
-    ```
+  ```bash
+  curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
+    -d '{"affiliate":"partnerX"}'
+  ```
 
 ## Front‑end
 
