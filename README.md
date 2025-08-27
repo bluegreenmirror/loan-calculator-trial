@@ -10,7 +10,7 @@ Jump‑start your next ride with a fast, responsive vehicle loan payment calcula
 - 📊 **Cost breakdown chart**: smooth 3D pie chart with a CSS bounce effect highlighting principal vs interest, with the legend displayed outside the chart.
 - 🎰 **Rolling digits**: payment amounts animate with fast, smooth scrolling numbers.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
-- 👨‍⚖️ **Lead capture**: name/email/phone (+ affiliate/UTM captured automatically).
+- 👨‍⚖️ **Lead capture**: name/email/phone validated and persisted (+ affiliate/UTM captured automatically).
 - 🤝 **Affiliate tracking**: records click metadata; passthrough to form.
 - 💐 **API for dealerships**: compute quotes, accept leads.
 - 👨‍⚖️ **Dockerized**: Caddy (TLS), FastAPI, static web.
@@ -56,8 +56,10 @@ Base URL in dev: `http://localhost`
 
   ```bash
   curl -s http://localhost/api/leads -X POST -H 'content-type: application/json' \
-    -d '{"name":"Jane Doe","email":"jane@example.com","phone":"415-555-1212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
-  ```
+    -d '{"name":"Jane Doe","email":"jane@example.com","phone":"+14155551212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
+```
+
+Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
 
 - Affiliate tracking (POST JSON):
 
@@ -77,10 +79,11 @@ Base URL in dev: `http://localhost`
 
 All settings live in `.env`:
 
-| var      | dev                 | prod             | note                  |
-| -------- | ------------------- | ---------------- | --------------------- |
-| `DOMAIN` | `localhost`         | your domain      | Caddy site address    |
-| `EMAIL`  | `admin@example.com` | admin@yourdomain | Let's Encrypt contact |
+| var          | dev                 | prod                  | note                          |
+| ------------ | ------------------- | --------------------- | ----------------------------- |
+| `DOMAIN`     | `localhost`         | your domain           | Caddy site address            |
+| `EMAIL`      | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact         |
+| `PERSIST_DIR` | `/data`             | `/data` or custom dir | Persisted lead/track storage  |
 
 ## CORS configuration
 
