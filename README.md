@@ -112,6 +112,7 @@ pytest
 
 - Tools: `ruff` (Python), `black` (Python), `yamllint` (YAML), `mdformat` (Markdown).
 - Local usage:
+  
   ```bash
   # Install tools (one-time)
   pip install -r requirements-dev.txt || pip install ruff black yamllint mdformat mdformat-gfm
@@ -122,7 +123,9 @@ pytest
   # Auto-format Python and Markdown
   make format
   ```
+  
 - Build-time check via Docker:
+  
   ```bash
   # Runs all linters at image build; fails on issues
   docker compose build lint
