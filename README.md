@@ -61,7 +61,7 @@ Base URL in dev: `http://localhost`
 
 ````
 
-Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
+Leads are stored in `leads.json` and tracking events in `tracks.json`, both inside `PERSIST_DIR` (default `/data`). Lead names must be non-empty and phone numbers (if provided) must include 10–15 digits with an optional leading `+`. Affiliate identifiers must not be empty. Invalid submissions are rejected and not written to disk.
 
 - Affiliate tracking (POST JSON):
 
@@ -118,12 +118,14 @@ Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --buil
 
 ## Testing
 
-Run the test suite to verify loan calculations and API endpoints.
+Run linting and the test suite locally before building.
 
 ```bash
 pip install -r requirements-dev.txt
-pytest
+make verify  # or `make test` to run tests only
 ```
+
+`deploy.sh --build` automatically runs `make verify`.
 
 ## Linting & Formatting
 
