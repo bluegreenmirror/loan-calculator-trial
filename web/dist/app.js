@@ -45,11 +45,63 @@ function fmt(n){
 
 let costChart;
 
+function createGradient(ctx, stops) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+  stops.forEach(([stop, color]) => gradient.addColorStop(stop, color));
+  return gradient;
+}
+
+const shadowPlugin = {
+  id: 'shadow',
+  beforeDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.25)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+  },
+  afterDatasetsDraw(chart) {
+    chart.ctx.restore();
+  }
+};
+
+const shinePlugin = {
+  id: 'shine',
+  afterDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    const { width, height, left, top } = chart.chartArea;
+    const x = left + width / 2;
+    const y = top + height / 2;
+    const r = Math.min(width, height) / 2;
+    const grad = ctx.createRadialGradient(x - r * 0.4, y - r * 0.4, 0, x - r * 0.4, y - r * 0.4, r);
+    grad.addColorStop(0, 'rgba(255,255,255,0.6)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+};
+
 function updateChart(principal, interest) {
   if (principal + interest === 0) return;
 
   const canvas = document.getElementById('cost-chart');
   const ctx = canvas.getContext('2d');
+  const principalGradient = createGradient(ctx, [
+    [0, '#93c5fd'],
+    [0.5, '#3b82f6'],
+    [1, '#1e3a8a']
+  ]);
+  const interestGradient = createGradient(ctx, [
+    [0, '#fdba74'],
+    [0.5, '#f97316'],
+    [1, '#c2410c']
+  ]);
   if (!costChart) {
     costChart = new Chart(ctx, {
       type: 'pie',
@@ -57,7 +109,7 @@ function updateChart(principal, interest) {
         labels: ['Total vehicle loan amount paid', 'Total interest paid'],
         datasets: [{
           data: [principal, interest],
-          backgroundColor: ['#d4af37', '#10b981'],
+          backgroundColor: [principalGradient, interestGradient],
           borderWidth: 0
         }]
       },
@@ -67,10 +119,12 @@ function updateChart(principal, interest) {
         plugins: {
           legend: { display: false }
         }
-      }
+      },
+      plugins: [shadowPlugin, shinePlugin]
     });
   } else {
     costChart.data.datasets[0].data = [principal, interest];
+    costChart.data.datasets[0].backgroundColor = [principalGradient, interestGradient];
     costChart.update('none');
   }
 
