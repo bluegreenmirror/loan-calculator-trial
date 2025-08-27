@@ -87,6 +87,28 @@ const shinePlugin = {
   }
 };
 
+const depthPlugin = {
+  id: 'depth',
+  beforeDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    const depth = 20;
+    const meta = chart.getDatasetMeta(0);
+    ctx.save();
+    meta.data.forEach(arc => {
+      const { x, y, startAngle, endAngle, outerRadius } = arc;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(startAngle) * outerRadius, y + Math.sin(startAngle) * outerRadius);
+      ctx.lineTo(x + Math.cos(startAngle) * outerRadius, y + depth + Math.sin(startAngle) * outerRadius);
+      ctx.arc(x, y + depth, outerRadius, startAngle, endAngle);
+      ctx.lineTo(x + Math.cos(endAngle) * outerRadius, y + Math.sin(endAngle) * outerRadius);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+};
+
 function updateChart(principal, interest) {
   if (principal + interest === 0) return;
 
@@ -110,7 +132,9 @@ function updateChart(principal, interest) {
         datasets: [{
           data: [principal, interest],
           backgroundColor: [principalGradient, interestGradient],
-          borderWidth: 0
+          borderColor: '#fff',
+          borderWidth: 4,
+          offset: [5, 5]
         }]
       },
       options: {
@@ -120,11 +144,12 @@ function updateChart(principal, interest) {
           legend: { display: false }
         }
       },
-      plugins: [shadowPlugin, shinePlugin]
+      plugins: [shadowPlugin, shinePlugin, depthPlugin]
     });
   } else {
     costChart.data.datasets[0].data = [principal, interest];
     costChart.data.datasets[0].backgroundColor = [principalGradient, interestGradient];
+    costChart.data.datasets[0].offset = [5, 5];
     costChart.update('none');
   }
 
