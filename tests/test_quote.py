@@ -41,21 +41,17 @@ def test_quote_zero_apr():
     assert resp.total_cost == 10000.0
 
 
-def test_quote_zero_term():
-    req = QuoteReq(
-        vehicle_price=10000,
-        down_payment=1000,
-        apr=5.0,
-        term_months=0,
-        tax_rate=0.0,
-        fees=0.0,
-        trade_in_value=0.0,
-    )
-    resp = quote(req)
-    assert resp.amount_financed == 9000.0
-    assert resp.monthly_payment == 0
-    assert resp.total_interest == 0
-    assert resp.total_cost == 9000.0
+def test_quote_zero_term_validation():
+    with pytest.raises(ValidationError):
+        QuoteReq(
+            vehicle_price=10000,
+            down_payment=1000,
+            apr=5.0,
+            term_months=0,
+            tax_rate=0.0,
+            fees=0.0,
+            trade_in_value=0.0,
+        )
 
 
 def test_quote_trade_in_exceeds_price():

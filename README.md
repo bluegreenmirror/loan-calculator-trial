@@ -125,6 +125,21 @@ make verify  # or `make test` to run tests only
 
 `deploy.sh --build` automatically runs `make verify`.
 
+### External checks
+
+Some tests depend on external services (for example, an already running Caddy on your machine). These are disabled by default and can be enabled explicitly:
+
+```bash
+# Run everything, including external checks
+pytest --run-external
+
+# Optional: point the Caddy health check at a custom URL
+CADDY_HEALTH_URL=http://localhost:8080 pytest --run-external
+
+# Run only fast, hermetic tests (default behavior)
+pytest -k 'not external'
+```
+
 ## Linting & Formatting
 
 - Tools: `ruff` (Python), `black` (Python), `mypy` with the `pydantic.mypy` plugin, `yamllint` (YAML), `mdformat` (Markdown).
