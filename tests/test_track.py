@@ -8,6 +8,7 @@ client = TestClient(app)
 
 
 def test_track_persistence(tmp_path, monkeypatch):
+    """Tests that a valid tracking event is persisted to a JSON file."""
     monkeypatch.setenv("PERSIST_DIR", str(tmp_path))
     payload = {"affiliate": "partner1"}
     resp = client.post("/api/track", json=payload)
@@ -19,6 +20,7 @@ def test_track_persistence(tmp_path, monkeypatch):
 
 
 def test_track_invalid_affiliate(tmp_path, monkeypatch):
+    """Tests that a tracking event with an empty affiliate is rejected."""
     monkeypatch.setenv("PERSIST_DIR", str(tmp_path))
     payload = {"affiliate": ""}
     resp = client.post("/api/track", json=payload)
