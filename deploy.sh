@@ -34,11 +34,6 @@ fi
 
 echo "Deployed. Checking health..."
 sleep 2
-# Use curl to check domain; fallback to localhost if .env set to http
-proto="https://"
-if echo "$(grep ^ADDR .env | cut -d= -f2)" | grep -q "http://"; then
-  proto="http://"
-fi
 domain=$(grep ^DOMAIN .env | cut -d= -f2)
-status=$(curl -Is $proto$domain | head -n 1 | sed 's/\r$//')
+status=$(curl -Is https://$domain | head -n 1 | sed 's/\r$//')
 echo "$status"
