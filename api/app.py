@@ -88,7 +88,7 @@ def _data_file(filename: str) -> str:
 class LeadReq(BaseModel):
     name: str
     email: EmailStr
-    phone: constr(regex=r"^\+?[0-9]{10,15}$") | None = None
+    phone: constr(pattern=r"^\+?[0-9]{10,15}$") | None = Field(default=None)
     vehicle_type: str | None = None
     price: float | None = None
     affiliate: str | None = None
