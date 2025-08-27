@@ -298,3 +298,23 @@ document.getElementById('lead-form').addEventListener('submit', handleLeadSubmis
 // Initialize with default values
 applyPreset(document.getElementById('vehicle').value);
 calc();
+
+async function setServerDate() {
+  try {
+    const res = await fetch('/api/health', { cache: 'no-store' });
+    const dateHeader = res.headers.get('Date');
+    if (dateHeader) {
+      const formatted = new Date(dateHeader).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      const headerDate = document.querySelector('.date');
+      if (headerDate) headerDate.textContent = formatted;
+      document.querySelectorAll('.disclaimer-date').forEach(el => {
+        el.textContent = formatted;
+      });
+    }
+  } catch (err) {
+    console.error('Failed to fetch server date', err);
+  }
+}
+setServerDate();
