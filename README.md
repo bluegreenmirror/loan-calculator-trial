@@ -61,7 +61,7 @@ Base URL in dev: `http://localhost`
 
 ````
 
-Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
+Leads are stored in `leads.json` and tracking events in `tracks.json`, both inside `PERSIST_DIR` (default `/data`). Lead names must be non-empty and phone numbers (if provided) must include 10–15 digits with an optional leading `+`. Affiliate identifiers must not be empty.
 
 - Affiliate tracking (POST JSON):
 
