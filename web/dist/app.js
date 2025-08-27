@@ -43,6 +43,52 @@ function fmt(n){
   return n.toLocaleString(undefined, {style:'currency', currency:'USD'})
 }
 
+function animateNumber(el, value) {
+  const newStr = fmt(value);
+  const oldStr = el.dataset.current || el.textContent;
+  el.dataset.current = newStr;
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < newStr.length; i++) {
+    const newCh = newStr[i];
+    const oldCh = oldStr[i] || '0';
+    if (/\d/.test(newCh)) {
+      const wrapper = document.createElement('span');
+      wrapper.className = 'digit-wrapper';
+      const digits = document.createElement('span');
+      digits.className = 'digits';
+      for (let d = 0; d < 10; d++) {
+        const digit = document.createElement('span');
+        digit.className = 'digit';
+        digit.textContent = d;
+        digits.appendChild(digit);
+      }
+      const startDigit = /^\d$/.test(oldCh) ? parseInt(oldCh, 10) : 0;
+      digits.style.transform = `translateY(-${startDigit * 10}%)`;
+      wrapper.appendChild(digits);
+      frag.appendChild(wrapper);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'digit-symbol';
+      span.textContent = newCh;
+      frag.appendChild(span);
+    }
+  }
+  el.innerHTML = '';
+  el.appendChild(frag);
+  requestAnimationFrame(() => {
+    const digitElems = el.querySelectorAll('.digits');
+    let idx = 0;
+    for (let i = 0; i < newStr.length; i++) {
+      const ch = newStr[i];
+      if (/\d/.test(ch)) {
+        const digits = digitElems[idx++];
+        digits.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.4, 1)';
+        digits.style.transform = `translateY(-${parseInt(ch, 10) * 10}%)`;
+      }
+    }
+  });
+}
+
 let costChart;
 
 function updateChart(principal, interest) {
@@ -120,10 +166,10 @@ function calc(){
       const total = monthly * termMonths;
       const interest = Math.max(total - principal, 0);
 
-      document.getElementById('fin').textContent = fmt(principal);
-      document.getElementById('pay').textContent = fmt(monthly);
-      document.getElementById('int').textContent = fmt(interest);
-      document.getElementById('tot').textContent = fmt(total);
+      animateNumber(document.getElementById('fin'), principal);
+      animateNumber(document.getElementById('pay'), monthly);
+      animateNumber(document.getElementById('int'), interest);
+      animateNumber(document.getElementById('tot'), total);
       
       updateChart(principal, interest);
       
@@ -137,10 +183,10 @@ function calc(){
       calcStatus.textContent = error.message;
       
       // Reset results
-      document.getElementById('fin').textContent = '$0';
-      document.getElementById('pay').textContent = '$0';
-      document.getElementById('int').textContent = '$0';
-      document.getElementById('tot').textContent = '$0';
+      animateNumber(document.getElementById('fin'), 0);
+      animateNumber(document.getElementById('pay'), 0);
+      animateNumber(document.getElementById('int'), 0);
+      animateNumber(document.getElementById('tot'), 0);
     } finally {
       // Reset button state
       calcBtn.disabled = false;
@@ -252,3 +298,23 @@ document.getElementById('lead-form').addEventListener('submit', handleLeadSubmis
 // Initialize with default values
 applyPreset(document.getElementById('vehicle').value);
 calc();
+
+async function setServerDate() {
+  try {
+    const res = await fetch('/api/health', { cache: 'no-store' });
+    const dateHeader = res.headers.get('Date');
+    if (dateHeader) {
+      const formatted = new Date(dateHeader).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      const headerDate = document.querySelector('.date');
+      if (headerDate) headerDate.textContent = formatted;
+      document.querySelectorAll('.disclaimer-date').forEach(el => {
+        el.textContent = formatted;
+      });
+    }
+  } catch (err) {
+    console.error('Failed to fetch server date', err);
+  }
+}
+setServerDate();

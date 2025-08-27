@@ -1,0 +1,17 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set environment variables
+        run: |
+          echo "DOMAIN=${{ secrets.DOMAIN }}" >> $GITHUB_ENV
+          echo "EMAIL=${{ secrets.EMAIL }}" >> $GITHUB_ENV
+      - name: Run deploy script
+        run: ./deploy.sh --build --pull

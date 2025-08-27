@@ -2,10 +2,13 @@
 
 Jump‑start your next ride with a fast, responsive vehicle loan payment calculator for autos, RVs, motorcycles, and jet skis — complete with lead‑gen and affiliate tracking. Fully containerized, tuned for growth, and ready to deploy. Calculate, compare, and cruise toward your dream vehicle today!
 
+> **Note:** This project is for demo purposes only as of Aug 25, 2025 and may not result in offers or responses.
+
 ## Features
 
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
 - 📊 **Cost breakdown chart**: smooth 3D pie chart with a CSS bounce effect highlighting principal vs interest, with the legend displayed outside the chart.
+- 🎰 **Rolling digits**: payment amounts animate with fast, smooth scrolling numbers.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
 - 👨‍⚖️ **Lead capture**: name/email/phone (+ affiliate/UTM captured automatically).
 - 🤝 **Affiliate tracking**: records click metadata; passthrough to form.
@@ -84,9 +87,26 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
+Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
+
 1. Point DNS to your server.
-1. Set `DOMAIN` and `EMAIL` in `.env`.
-1. Run `./deploy.sh --build`.
+2. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
+3. In `.env`, set:
+   ```
+   ADDR=${DOMAIN}
+   TLS_DIRECTIVE=tls ${EMAIL}
+   ```
+   and remove `AUTO_HTTPS` and `HSTS_LINE`.
+4. Run `./deploy.sh --build`.
+
+## Testing
+
+Run the test suite to verify loan calculations and API endpoints.
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
 
 ## Linting & Formatting
 

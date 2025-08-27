@@ -3,3 +3,5 @@ ruff==0.6.4
 yamllint==1.35.1
 mdformat==0.7.17
 mdformat-gfm==0.3.6
+pytest==8.2.0
+requests==2.31.0
