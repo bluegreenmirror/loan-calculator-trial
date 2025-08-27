@@ -57,7 +57,9 @@ Base URL in dev: `http://localhost`
   ```bash
   curl -s http://localhost/api/leads -X POST -H 'content-type: application/json' \
     -d '{"name":"Jane Doe","email":"jane@example.com","phone":"+14155551212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
-```
+  ```
+
+````
 
 Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
 
@@ -66,7 +68,7 @@ Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
   ```bash
   curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
     -d '{"affiliate":"partnerX"}'
-  ```
+````
 
 ## Front‑end
 
@@ -79,11 +81,11 @@ Leads are stored in `leads.json` inside `PERSIST_DIR` (default `/data`).
 
 All settings live in `.env`:
 
-| var          | dev                 | prod                  | note                          |
-| ------------ | ------------------- | --------------------- | ----------------------------- |
-| `DOMAIN`     | `localhost`         | your domain           | Caddy site address            |
-| `EMAIL`      | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact         |
-| `PERSIST_DIR` | `/data`             | `/data` or custom dir | Persisted lead/track storage  |
+| var           | dev                 | prod                  | note                         |
+| ------------- | ------------------- | --------------------- | ---------------------------- |
+| `DOMAIN`      | `localhost`         | your domain           | Caddy site address           |
+| `EMAIL`       | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
+| `PERSIST_DIR` | `/data`             | `/data` or custom dir | Persisted lead/track storage |
 
 ## CORS configuration
 
