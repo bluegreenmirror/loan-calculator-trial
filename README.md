@@ -107,6 +107,15 @@ Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --buil
    and remove `AUTO_HTTPS` and `HSTS_LINE`.
 1. Run `./deploy.sh --build`.
 
+## Testing
+
+Run the test suite to verify loan calculations and API endpoints.
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
 ## Linting & Formatting
 
 - Tools: `ruff` (Python), `black` (Python), `yamllint` (YAML), `mdformat` (Markdown).
