@@ -46,21 +46,21 @@ Base URL in dev: `http://localhost`
   ```
 
 - Quote (POST JSON):
-  
+
   ```bash
   curl -s http://localhost/api/quote -X POST -H 'content-type: application/json' \
     -d '{"vehicle_price":35000,"down_payment":3000,"apr":6.9,"term_months":60,"tax_rate":0.095,"fees":495,"trade_in_value":0}'
   ```
 
 - Leads (POST JSON):
-  
+
   ```bash
   curl -s http://localhost/api/leads -X POST -H 'content-type: application/json' \
     -d '{"name":"Jane Doe","email":"jane@example.com","phone":"415-555-1212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
   ```
 
 - Affiliate tracking (POST JSON):
-  
+
   ```bash
   curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
     -d '{"affiliate":"partnerX"}'
@@ -77,10 +77,10 @@ Base URL in dev: `http://localhost`
 
 All settings live in `.env`:
 
-| var | dev | prod | note |
-| --- | --- | ---- | ---- |
-| `DOMAIN` | `localhost` | your domain | Caddy site address |
-| `EMAIL` | `admin@example.com` | admin@yourdomain | Let's Encrypt contact |
+| var      | dev                 | prod             | note                  |
+| -------- | ------------------- | ---------------- | --------------------- |
+| `DOMAIN` | `localhost`         | your domain      | Caddy site address    |
+| `EMAIL`  | `admin@example.com` | admin@yourdomain | Let's Encrypt contact |
 
 ## CORS configuration
 
@@ -97,8 +97,10 @@ Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
 
 1. Point DNS to your server.
-2. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
-3. In `.env`, set:
+
+1. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
+
+1. In `.env`, set:
 
    ```bash
    ADDR=${DOMAIN}
@@ -106,7 +108,8 @@ Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --buil
    ```
 
    and remove `AUTO_HTTPS` and `HSTS_LINE`.
-4. Run `./deploy.sh --build`.
+
+1. Run `./deploy.sh --build`.
 
 ## Testing
 
@@ -120,8 +123,9 @@ pytest
 ## Linting & Formatting
 
 - Tools: `ruff` (Python), `black` (Python), `yamllint` (YAML), `mdformat` (Markdown).
+
 - Local usage:
-  
+
   ```bash
   # Install tools (one-time)
   pip install -r requirements-dev.txt || pip install ruff black yamllint mdformat mdformat-gfm
@@ -132,9 +136,9 @@ pytest
   # Auto-format Python and Markdown
   make format
   ```
-  
+
 - Build-time check via Docker:
-  
+
   ```bash
   # Runs all linters at image build; fails on issues
   docker compose build lint
