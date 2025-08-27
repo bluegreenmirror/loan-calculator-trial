@@ -83,6 +83,8 @@ All settings live in `.env`:
 
 | var           | dev                 | prod                  | note                         |
 | ------------- | ------------------- | --------------------- | ---------------------------- |
+| `APEX_HOST`   | `localhost`         | `example.com`         | Base domain (API)            |
+| `WWW_HOST`    | `localhost`         | `www.example.com`     | Web host                     |
 | `DOMAIN`      | `localhost`         | your domain           | Caddy site address           |
 | `EMAIL`       | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
 | `PERSIST_DIR` | `/data`             | `/data` or custom dir | Persisted lead/track storage |
@@ -99,7 +101,7 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
-Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
+Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `DOMAIN`, `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
 
 1. Point DNS to your server.
 
