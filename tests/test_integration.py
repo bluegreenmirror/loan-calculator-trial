@@ -22,6 +22,7 @@ def live_server(tmp_path_factory):
 
 
 def test_integration_quote(live_server):
+    """Tests the /api/quote endpoint with a valid request."""
     base_url, _ = live_server
     payload = {
         "vehicle_price": 20000,
@@ -43,6 +44,7 @@ def test_integration_quote(live_server):
 
 
 def test_integration_lead_persistence(live_server):
+    """Tests that a lead submitted to /api/leads is persisted to disk."""
     base_url, data_dir = live_server
     payload = {"name": "Alice", "email": "alice@example.com", "phone": "+12345678901"}
     resp = requests.post(f"{base_url}/api/leads", json=payload)
@@ -50,3 +52,14 @@ def test_integration_lead_persistence(live_server):
     with open(data_dir / "leads.json") as f:
         data = json.load(f)
     assert data[0]["email"] == "alice@example.com"
+
+
+def test_integration_track_persistence(live_server):
+    """Tests that a tracking event submitted to /api/track is persisted to disk."""
+    base_url, data_dir = live_server
+    payload = {"affiliate": "partner1"}
+    resp = requests.post(f"{base_url}/api/track", json=payload)
+    assert resp.status_code == 200
+    with open(data_dir / "tracks.json") as f:
+        data = json.load(f)
+    assert data[0]["affiliate"] == "partner1"

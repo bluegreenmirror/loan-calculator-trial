@@ -19,6 +19,7 @@ if [ $PULL -eq 1 ]; then
 fi
 
 if [ $BUILD -eq 1 ]; then
+  make verify
   docker compose build --pull
 fi
 
