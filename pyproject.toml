@@ -32,6 +32,10 @@ per-file-ignores = {}
 [tool.ruff.format]
 quote-style = "double"
 
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+warn_unused_configs = true
+
 [tool.mdformat]
 wrap = 88
 extensions = ["gfm"]
