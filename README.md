@@ -92,7 +92,10 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
+Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
+
 1. Point DNS to your server.
+1. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
 1. In `.env`, set:
    ```
    ADDR=${DOMAIN}
