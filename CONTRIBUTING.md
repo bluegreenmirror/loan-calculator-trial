@@ -41,7 +41,7 @@ We follow Conventional Commits:
 
 ## Environment
 - Use .env.example for reference, never commit real secre- 
-- Dev mode: ADDR=http://localhost, auto_https off.
+- Dev mode: set DOMAIN=localhost and EMAIL=admin@example.com.
 - Prod mode: real domain with TLS.
 
 ## Testing

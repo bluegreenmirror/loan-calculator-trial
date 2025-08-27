@@ -25,19 +25,15 @@ cd loan-calculator-trial
 
 # Set environment for local dev
 cp .env.example .env
-# Dev (no TLS):
-# ADDR=http://localhost
-# AUTO_HTTPS=auto_https off
-# TLS_DIRECTIVE=
-# HSTS_LINE=
+# Edit DOMAIN and EMAIL in .env
 
 # Run the stack
 ./deploy.sh --build
 
-# Open http://localhost
+# Open https://$DOMAIN
 ```
 
-For production, set `ADDR=${DOMAIN}`, `TLS_DIRECTIVE=tls ${EMAIL}`, and remove `AUTO_HTTPS` and `HSTS_LINE` from `.env`.
+Set `DOMAIN` to your hostname and `EMAIL` to the address used for Let's Encrypt certificates.
 
 ## API
 
@@ -74,14 +70,10 @@ Base URL in dev: `http://localhost`
 
 All settings live in `.env`:
 
-| var             | dev                | prod                                                                       | note                       |
-| --------------- | ------------------ | -------------------------------------------------------------------------- | -------------------------- |
-| `ADDR`          | `http://localhost` | `${DOMAIN}`                                                                | Caddy site address         |
-| `AUTO_HTTPS`    | `auto_https off`   | *(unset)*                                                                  | disable TLS in dev         |
-| `TLS_DIRECTIVE` | *(unset)*          | `tls ${EMAIL}`                                                             | prod TLS via Let’s Encrypt |
-| `HSTS_LINE`     | *(unset)*          | `Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"` | HSTS only in prod          |
-| `DOMAIN`        | *(optional)*       | your domain                                                                | used by Caddy TLS          |
-| `EMAIL`         | *(optional)*       | admin@yourdomain                                                           | used by Caddy TLS          |
+| var | dev | prod | note |
+| --- | --- | ---- | ---- |
+| `DOMAIN` | `localhost` | your domain | Caddy site address |
+| `EMAIL` | `admin@example.com` | admin@yourdomain | Let's Encrypt contact |
 
 ## CORS configuration
 
@@ -98,14 +90,14 @@ Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
 
 1. Point DNS to your server.
-1. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
-1. In `.env`, set:
+2. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
+3. In `.env`, set:
    ```
    ADDR=${DOMAIN}
    TLS_DIRECTIVE=tls ${EMAIL}
    ```
    and remove `AUTO_HTTPS` and `HSTS_LINE`.
-1. Run `./deploy.sh --build`.
+4. Run `./deploy.sh --build`.
 
 ## Testing
 

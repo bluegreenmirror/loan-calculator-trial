@@ -49,8 +49,8 @@ Provide a **fast, responsive, and extensible vehicle loan calculator** that can 
 1. **Deployment**
 
    - Docker Compose stack: `caddy` (reverse proxy), `web` (static), `api` (FastAPI).
-   - Caddy handles TLS in prod, auto-HTTPS disabled in dev.
-   - Configurable via `.env` (`ADDR`, `TLS_DIRECTIVE`, etc.).
+   - Caddy handles TLS via domain and email variables.
+   - Configurable via `.env` (`DOMAIN`, `EMAIL`).
 
 ## Non-Functional Requirements
 
