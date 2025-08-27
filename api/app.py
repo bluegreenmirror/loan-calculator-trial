@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,8 +26,8 @@ app.add_middleware(
 class QuoteReq(BaseModel):
     vehicle_price: float = Field(..., gt=0)
     down_payment: float = 0
-    apr: float = Field(..., gt=0)
-    term_months: int = Field(..., gt=0)
+    apr: float = Field(..., ge=0)
+    term_months: int = Field(..., ge=0)
     tax_rate: float = 0.0
     fees: float = 0.0
     trade_in_value: float = 0.0
@@ -86,12 +87,12 @@ def _data_file(filename: str) -> str:
 
 
 class LeadReq(BaseModel):
-    name: str
+    name: constr(strip_whitespace=True, min_length=1)
     email: EmailStr
-    phone: constr(pattern=r"^\+?[0-9]{10,15}$") | None = Field(default=None)
-    vehicle_type: str | None = None
-    price: float | None = None
-    affiliate: str | None = None
+    phone: Optional[constr(pattern=r"^\+?[0-9]{10,15}$")] = Field(default=None)
+    vehicle_type: Optional[str] = None
+    price: Optional[float] = None
+    affiliate: Optional[str] = None
 
 
 class LeadResp(BaseModel):
@@ -115,7 +116,7 @@ def create_lead(lead: LeadReq):
 
 
 class TrackReq(BaseModel):
-    affiliate: str
+    affiliate: constr(strip_whitespace=True, min_length=1)
 
 
 class TrackResp(BaseModel):
