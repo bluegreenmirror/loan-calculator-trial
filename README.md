@@ -40,20 +40,27 @@ Set `DOMAIN` to your hostname and `EMAIL` to the address used for Let's Encrypt 
 Base URL in dev: `http://localhost`
 
 - Health:
+
   ```bash
   curl -s http://localhost/api/health
   ```
+
 - Quote (POST JSON):
+  
   ```bash
   curl -s http://localhost/api/quote -X POST -H 'content-type: application/json' \
     -d '{"vehicle_price":35000,"down_payment":3000,"apr":6.9,"term_months":60,"tax_rate":0.095,"fees":495,"trade_in_value":0}'
   ```
+
 - Leads (POST JSON):
+  
   ```bash
   curl -s http://localhost/api/leads -X POST -H 'content-type: application/json' \
     -d '{"name":"Jane Doe","email":"jane@example.com","phone":"415-555-1212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
   ```
+
 - Affiliate tracking (POST JSON):
+  
   ```bash
   curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
     -d '{"affiliate":"partnerX"}'
@@ -92,10 +99,12 @@ Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --buil
 1. Point DNS to your server.
 2. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
 3. In `.env`, set:
-   ```
+
+   ```bash
    ADDR=${DOMAIN}
    TLS_DIRECTIVE=tls ${EMAIL}
    ```
+
    and remove `AUTO_HTTPS` and `HSTS_LINE`.
 4. Run `./deploy.sh --build`.
 
@@ -135,7 +144,7 @@ pytest
 
 ## Repository layout
 
-```
+```md
 .
 ├─ api/
 │  ├─ app.py           # FastAPI app (health, quote, leads)
