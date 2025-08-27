@@ -8,15 +8,20 @@ We welcome contributions from developers, product thinkers, and automation agent
    ```bash
    git checkout -b feature/your-feature
    ```
-3.	Copy .env.example to .env and adjust for dev:
+3. Copy `.env.example` to `.env` and adjust for dev:
    ```bash
    cp .env.example .env
    ```
-4. Run the stack
+4. Install development tools and set up git hooks:
+   ```bash
+   pip install -r requirements-dev.txt
+   pre-commit install
+   ```
+5. Run the stack:
    ```bash
    ./deploy.sh --build
    ```
-5. Open http://localhost to test.
+6. Open http://localhost to test.
 
 ## Commit Style
 
@@ -27,7 +32,7 @@ We follow Conventional Commits:
 - docs: documentation
 
 ## Example
->feat(api): add /api/leads endpoint
+> feat(api): add /api/leads endpoint
 
 ## Pull Requests
 - Keep PRs atomic (small and focused).
@@ -37,11 +42,12 @@ We follow Conventional Commits:
 ## Code Style
 - Python: PEP8 + type hints.
 - HTML/JS: Prettier defaults, semantic HTML.
-- YAML: 2-space indentation 
+- YAML: 2-space indentation
+- Run `pre-commit run --all-files` or `make lint` before committing.
 
 ## Environment
-- Use .env.example for reference, never commit real secre- 
-- Dev mode: set DOMAIN=localhost and EMAIL=admin@example.com.
+- Use `.env.example` for reference, never commit real secrets.
+- Dev mode: set `DOMAIN=localhost` and `EMAIL=admin@example.com`.
 - Prod mode: real domain with TLS.
 
 ## Testing
@@ -51,3 +57,4 @@ We follow Conventional Commits:
 ## Issues
 - Use GitHub Issues for bugs/feature requests.
 - Good first issues will be labeled.
+
