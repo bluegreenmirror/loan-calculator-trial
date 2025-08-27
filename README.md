@@ -127,16 +127,20 @@ pytest
 
 ## Linting & Formatting
 
-- Tools: `ruff` (Python), `black` (Python), `yamllint` (YAML), `mdformat` (Markdown).
+- Tools: `ruff` (Python), `black` (Python), `mypy` with the `pydantic.mypy` plugin, `yamllint` (YAML), `mdformat` (Markdown).
 
 - Local usage:
 
   ```bash
   # Install tools (one-time)
-  pip install -r requirements-dev.txt || pip install ruff black yamllint mdformat mdformat-gfm
+  pip install -r requirements-dev.txt || pip install ruff black mypy yamllint mdformat mdformat-gfm pre-commit
+
+  # Install git hooks
+  pre-commit install
 
   # Check everything
   make lint
+  pre-commit run --all-files
 
   # Auto-format Python and Markdown
   make format
