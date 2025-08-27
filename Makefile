@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 VENV_PREFIX = .venv/bin/
 
-.PHONY: lint format lint-python lint-yaml lint-md lint-docker
+.PHONY: lint format lint-python lint-yaml lint-md lint-docker test verify
 
 lint: lint-python lint-yaml lint-md ## Run all linters
 
@@ -21,6 +21,11 @@ lint-md: ## mdformat --check
 
 lint-docker: ## Build lint image which runs checks at build-time
 	docker build -f Dockerfile.lint .
+
+test: ## Run unit and integration tests
+	$(VENV_PREFIX)pytest
+
+verify: lint test ## Lint and run tests
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}' | sort
