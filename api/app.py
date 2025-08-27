@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field, constr
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
 
@@ -79,10 +79,16 @@ def quote(q: QuoteReq):
     )
 
 
+def _data_file(filename: str) -> str:
+    data_dir = os.getenv("PERSIST_DIR", "/data")
+    os.makedirs(data_dir, exist_ok=True)
+    return os.path.join(data_dir, filename)
+
+
 class LeadReq(BaseModel):
     name: str
-    email: str
-    phone: str | None = None
+    email: EmailStr
+    phone: constr(regex=r"^\+?[0-9]{10,15}$") | None = None
     vehicle_type: str | None = None
     price: float | None = None
     affiliate: str | None = None
@@ -94,7 +100,7 @@ class LeadResp(BaseModel):
 
 @app.post("/api/leads", response_model=LeadResp)
 def create_lead(lead: LeadReq):
-    leads_file = "leads.json"
+    leads_file = _data_file("leads.json")
     lead_entry = lead.dict()
     lead_entry["timestamp"] = datetime.utcnow().isoformat()
     if os.path.exists(leads_file):
@@ -118,7 +124,7 @@ class TrackResp(BaseModel):
 
 @app.post("/api/track", response_model=TrackResp)
 def track_click(track: TrackReq):
-    track_file = "tracks.json"
+    track_file = _data_file("tracks.json")
     entry = {"affiliate": track.affiliate, "timestamp": datetime.utcnow().isoformat()}
     if os.path.exists(track_file):
         with open(track_file) as f:
