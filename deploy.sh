@@ -34,7 +34,7 @@ if [ $PRUNE -eq 1 ]; then
 fi
 
 echo "Deployed. Checking health..."
-sleep 2
+sleep 5
 domain=$(grep ^DOMAIN .env | cut -d= -f2)
-status=$(curl -Is https://$domain | head -n 1 | sed 's/\r$//')
+status=$(curl -Is http://$domain | head -n 1 | sed 's/$//')
 echo "$status"

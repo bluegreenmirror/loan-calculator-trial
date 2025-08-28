@@ -33,6 +33,13 @@ services:
     networks:
       - loancalc
 
+  web:
+    build: ./web
+    restart: unless-stopped
+    command: tail -f /dev/null
+    networks:
+      - loancalc
+
 volumes:
   caddy_data:
   caddy_config:
