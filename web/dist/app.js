@@ -91,6 +91,27 @@ function animateNumber(el, value) {
 
 let costChart;
 
+// Grab Chart.js' Tooltip helper so we can extend it. When using the CDN build
+// the helper lives on the global `Chart` object.
+const { Tooltip } = Chart;
+
+// Custom tooltip positioner that places the tooltip outside the pie slice.
+// Without this, Chart.js centers the tooltip on the slice, leaving the caret
+// inside the chart where it gets clipped. Attaching our function to
+// `Tooltip.positioners` registers the new option value `position: 'outside'`.
+Tooltip.positioners.outside = function (items) {
+  if (!items.length) return false;
+  const arc = items[0].element;
+  const angle = (arc.startAngle + arc.endAngle) / 2;
+  const offset = 16; // pixels away from the outer edge of the pie
+  const x = arc.x + Math.cos(angle) * (arc.outerRadius + offset);
+  const y = arc.y + Math.sin(angle) * (arc.outerRadius + offset);
+  // Return explicit alignment so the tooltip caret points back toward the slice
+  const xAlign = Math.abs(x - arc.x) < 1 ? 'center' : (x > arc.x ? 'left' : 'right');
+  const yAlign = Math.abs(y - arc.y) < 1 ? 'center' : (y > arc.y ? 'top' : 'bottom');
+  return { x, y, xAlign, yAlign };
+};
+
 function updateChart(principal, interest) {
   if (principal + interest === 0) return;
 
@@ -110,8 +131,18 @@ function updateChart(principal, interest) {
       options: {
         animation: false,
         maintainAspectRatio: false,
+        layout: {
+          // Give the canvas breathing room so our custom outside tooltip
+          // isn't clipped by the chart area. Without enough padding the
+          // caret ends up inside the pie and looks cut off.
+          padding: 24
+        },
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            // Float tooltip outside the pie using the custom positioner above
+            position: 'outside'
+          }
         }
       }
     });
