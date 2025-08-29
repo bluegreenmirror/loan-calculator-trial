@@ -5,6 +5,7 @@ import pytest
 
 @pytest.mark.external
 def test_caddy_health():
+
     """Tests that the Caddy server (external) is running and accessible.
 
     Uses HEAD request against CADDY_HEALTH_URL (defaults to http://localhost).

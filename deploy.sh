@@ -99,6 +99,19 @@ if ! DockerComposeUpOutput=$($DOCKER_CMD compose up -d 2>&1); then
   exit 1
 fi
 
+domain=$(grep ^DOMAIN .env | cut -d= -f2)
+echo "Waiting for Caddy at http://$domain ..."
+for i in {1..20}; do
+  if curl -sSf -o /dev/null http://$domain; then
+    echo "Caddy is up."
+    break
+  fi
+  sleep 1
+done
+
+# Run lint and tests after services are up so Caddy health test passes
+make verify
+
 if [ $PRUNE -eq 1 ]; then
   $DOCKER_CMD image prune -f
 fi
