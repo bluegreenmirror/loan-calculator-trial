@@ -164,6 +164,23 @@ CADDY_HEALTH_URL=http://localhost:8080 pytest --run-external
 
 # Run only fast, hermetic tests (default behavior)
 pytest -k 'not external'
+
+## Releases & Rollback
+
+- Tag a release:
+  - `make release-tag VERSION=v0.1.0 VERIFY=1 PUSH=1`
+    - Creates an annotated git tag (runs linters/tests if `VERIFY=1`) and pushes it if `PUSH=1`.
+
+- Deploy a specific version (on server):
+  - `git checkout v0.1.0 && ./deploy.sh -b --verify`
+
+- Roll back to a previous version (scripted):
+  - `make rollback REF=v0.1.0 BUILD=1 VERIFY=1 YES=1`
+    - Checks out the ref and redeploys via `deploy.sh`.
+
+Notes:
+- Ensure `.env` is present on the server with your production values before deploying.
+- If you prefer image-based releases, configure your container registry and extend the scripts to build/push images per tag.
 ```
 
 ## Linting & Formatting

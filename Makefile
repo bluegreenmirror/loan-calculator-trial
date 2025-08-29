@@ -5,7 +5,7 @@ VENV_PREFIX = .venv/bin/
 ENV_FILE := $(firstword $(wildcard .env .env.example))
 DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 
-.PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release
+.PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release prod-validate release-tag rollback
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
 
@@ -48,3 +48,13 @@ build-dev: ## Build dev images (runs verify, builds all services)
 
 build-release: ## Build release images (api + web only; no dev tooling)
 	docker compose build --pull api web
+
+prod-validate: ## Validate production hosts using curl (requires APEX_HOST, WWW_HOST)
+	@bash scripts/validate_caddy_prod.sh
+
+release-tag: ## Create an annotated release tag: make release-tag VERSION=vX.Y.Z [VERIFY=1] [PUSH=1]
+	@bash scripts/release_tag.sh $(VERSION) $(if $(VERIFY),--verify,) $(if $(PUSH),--push,)
+
+rollback: ## Roll back to a tag/commit: make rollback REF=<git-ref> [BUILD=1] [VERIFY=1] [YES=1]
+	@bash scripts/rollback_to.sh $(REF) $(if $(BUILD),--build,) $(if $(VERIFY),--verify,) $(if $(YES),--yes,)
+
