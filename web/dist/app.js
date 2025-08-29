@@ -104,10 +104,12 @@ Tooltip.positioners.outside = function (items) {
   const arc = items[0].element;
   const angle = (arc.startAngle + arc.endAngle) / 2;
   const offset = 16; // pixels away from the outer edge of the pie
-  return {
-    x: arc.x + Math.cos(angle) * (arc.outerRadius + offset),
-    y: arc.y + Math.sin(angle) * (arc.outerRadius + offset)
-  };
+  const x = arc.x + Math.cos(angle) * (arc.outerRadius + offset);
+  const y = arc.y + Math.sin(angle) * (arc.outerRadius + offset);
+  // Return explicit alignment so the tooltip caret points back toward the slice
+  const xAlign = Math.abs(x - arc.x) < 1 ? 'center' : (x > arc.x ? 'left' : 'right');
+  const yAlign = Math.abs(y - arc.y) < 1 ? 'center' : (y > arc.y ? 'top' : 'bottom');
+  return { x, y, xAlign, yAlign };
 };
 
 function updateChart(principal, interest) {
@@ -130,8 +132,8 @@ function updateChart(principal, interest) {
         animation: false,
         maintainAspectRatio: false,
         layout: {
-          // Pad canvas so our external tooltips have room to render
-          padding: 24
+          // Small padding so external tooltips have room without shrinking the chart
+          padding: 8
         },
         plugins: {
           legend: { display: false },
