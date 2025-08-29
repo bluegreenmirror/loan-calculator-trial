@@ -4,6 +4,7 @@ VENV_PREFIX = .venv/bin/
 # Prefer local .env, fall back to .env.example for CI
 ENV_FILE := $(firstword $(wildcard .env .env.example))
 DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
+COMPOSE_LOCAL := docker compose -f docker-compose.local.yml
 
 .PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release prod-validate release-tag rollback
 
@@ -29,13 +30,15 @@ lint-docker: ## Build lint image which runs checks at build-time
 	docker build -f Dockerfile.lint .
 
 lint-caddy: ## Validate Caddyfile syntax
-	docker run --rm $(DOCKER_ENV_FLAG) -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2.8 caddy validate --config /etc/caddy/Caddyfile
+	$(COMPOSE_LOCAL) exec caddy caddy validate --config /etc/caddy/Caddyfile
 
 format-caddy: ## Format Caddyfile
-	docker run --rm -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile caddy:2.8 caddy fmt --overwrite /etc/caddy/Caddyfile
+	$(COMPOSE_LOCAL) exec caddy caddy fmt --overwrite /etc/caddy/Caddyfile
 
 test: ## Run unit and integration tests
+	$(COMPOSE_LOCAL) up -d
 	$(VENV_PREFIX)pytest
+	$(COMPOSE_LOCAL) down
 
 verify: lint test ## Lint and run tests
 
@@ -44,10 +47,10 @@ help: ## Show this help
 
 build-dev: ## Build dev images (runs verify, builds all services)
 	$(MAKE) verify
-	docker compose build --pull
+	$(COMPOSE_LOCAL) build --pull
 
 build-release: ## Build release images (api + web only; no dev tooling)
-	docker compose build --pull api web
+	PROJECT_NAME=loancalc docker compose build --pull api web
 
 prod-validate: ## Validate production hosts using curl (requires APEX_HOST, WWW_HOST)
 	@bash scripts/validate_caddy_prod.sh
@@ -57,4 +60,3 @@ release-tag: ## Create an annotated release tag: make release-tag VERSION=vX.Y.Z
 
 rollback: ## Roll back to a tag/commit: make rollback REF=<git-ref> [BUILD=1] [VERIFY=1] [YES=1]
 	@bash scripts/rollback_to.sh $(REF) $(if $(BUILD),--build,) $(if $(VERIFY),--verify,) $(if $(YES),--yes,)
-

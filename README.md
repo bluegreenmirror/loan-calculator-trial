@@ -103,18 +103,18 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
   - `scripts/build-dev.sh`: Wrapper for `make build-dev`.
   - `scripts/build-release.sh`: Wrapper for `make build-release`.
 
-## Deploying
+## Deployment
 
-Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
+Any Docker-friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
 Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `DOMAIN`, `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
 
-For a step‑by‑step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
+For a step-by-step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
 
 Server setup (Ubuntu/Debian):
 
 ```bash
-# One‑time: copy env and set values
+# One-time: copy env and set values
 cp .env.example .env
 sed -i 's/example.com/your-domain.tld/' .env
 sed -i 's/admin@example.com/you@your-domain.tld/' .env
@@ -139,6 +139,12 @@ Manual health check after deploy:
 ```bash
 curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
 ```
+
+### Blue-Green Deployment
+
+This project is configured to support a blue-green deployment strategy to minimize downtime. This strategy is orchestrated by the `deploy.sh` and `deploy-blue-green.sh` scripts.
+
+For a detailed explanation of the release process, including how to perform a blue-green deployment, please see the [**Release Process documentation**](RELEASE_PROCESS.md).
 
 ## Testing
 
