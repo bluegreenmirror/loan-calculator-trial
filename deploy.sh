@@ -19,22 +19,33 @@ if [ $PULL -eq 1 ]; then
 fi
 
 if [ $BUILD -eq 1 ]; then
-  make verify
   docker compose build --pull
 fi
 
-# Start or update containers
+# Start or update containers first so Caddy is up for tests
 DockerComposeUpOutput=$(docker compose up -d 2>&1) || {
   echo "$DockerComposeUpOutput";
   exit 1;
 }
 
+domain=$(grep ^DOMAIN .env | cut -d= -f2)
+echo "Waiting for Caddy at http://$domain ..."
+for i in {1..20}; do
+  if curl -sSf -o /dev/null http://$domain; then
+    echo "Caddy is up."
+    break
+  fi
+  sleep 1
+done
+
+# Run lint and tests after services are up so Caddy health test passes
+make verify
+
 if [ $PRUNE -eq 1 ]; then
   docker image prune -f
 fi
 
-echo "Deployed. Checking health..."
-sleep 5
-domain=$(grep ^DOMAIN .env | cut -d= -f2)
-status=$(curl -Is http://$domain | head -n 1 | sed 's/$//')
+echo "Health:"
+status=$(curl -Is http://$domain | head -n 1 | sed 's/\r$//')
 echo "$status"
+
