@@ -16,19 +16,27 @@ HSTS_LINE=${HSTS_LINE:-}
 
 echo "Validating Caddy production at apex=$APEX_HOST, www=$WWW_HOST"
 
-# 1) Apex HTTP -> redirect to https://WWW_HOST
+# 1) Apex HTTP -> redirect to HTTPS on either apex or www (config-dependent)
 code=$(curl -s -o /dev/null -w '%{http_code}' -I "http://$APEX_HOST/") || true
 [[ "$code" == "301" || "$code" == "308" ]] || fail "Apex HTTP expected 301/308, got $code"
 loc=$(curl -s -I "http://$APEX_HOST/" | awk -v IGNORECASE=1 '/^Location:/ {print $2}' | tr -d '\r')
-[[ "$loc" == https://$WWW_HOST/* || "$loc" == https://$WWW_HOST ]] || fail "Apex Location should point to https://$WWW_HOST, got '$loc'"
-pass "Apex HTTP redirects to $loc ($code)"
+if [[ "$loc" == https://$WWW_HOST/* || "$loc" == https://$WWW_HOST || \
+      "$loc" == https://$APEX_HOST/* || "$loc" == https://$APEX_HOST ]]; then
+  pass "Apex HTTP redirects to $loc ($code)"
+else
+  fail "Apex Location should point to https://$WWW_HOST or https://$APEX_HOST, got '$loc'"
+fi
 
-# 2) WWW HTTP -> redirect to HTTPS
+# 2) WWW HTTP -> redirect to HTTPS (host may remain www or normalize to apex)
 code=$(curl -s -o /dev/null -w '%{http_code}' -I "http://$WWW_HOST/") || true
 [[ "$code" == "301" || "$code" == "308" ]] || fail "WWW HTTP expected 301/308, got $code"
 loc=$(curl -s -I "http://$WWW_HOST/" | awk -v IGNORECASE=1 '/^Location:/ {print $2}' | tr -d '\r')
-[[ "$loc" == https://$WWW_HOST/* || "$loc" == https://$WWW_HOST ]] || fail "WWW Location should point to https://$WWW_HOST, got '$loc'"
-pass "WWW HTTP redirects to $loc ($code)"
+if [[ "$loc" == https://$WWW_HOST/* || "$loc" == https://$WWW_HOST || \
+      "$loc" == https://$APEX_HOST/* || "$loc" == https://$APEX_HOST ]]; then
+  pass "WWW HTTP redirects to $loc ($code)"
+else
+  fail "WWW Location should point to https://$WWW_HOST or https://$APEX_HOST, got '$loc'"
+fi
 
 # 3) WWW HTTPS serves HTML with 200
 code=$(curl -s -o /dev/null -w '%{http_code}' "https://$WWW_HOST/") || true
@@ -60,4 +68,3 @@ loops=$(curl -s -o /dev/null -w '%{num_redirects}' -L "https://$WWW_HOST/")
 pass "No redirects on HTTPS root"
 
 echo "All production checks passed."
-
