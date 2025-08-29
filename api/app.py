@@ -1,10 +1,11 @@
 import json
 import os
 from datetime import datetime
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field, constr
+from pydantic import BaseModel, EmailStr, Field
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
 
@@ -25,8 +26,8 @@ app.add_middleware(
 class QuoteReq(BaseModel):
     vehicle_price: float = Field(..., gt=0)
     down_payment: float = 0
-    apr: float = Field(..., gt=0)
-    term_months: int = Field(..., gt=0)
+    apr: float = Field(..., ge=0)
+    term_months: int = Field(..., ge=0)
     tax_rate: float = 0.0
     fees: float = 0.0
     trade_in_value: float = 0.0
@@ -86,12 +87,12 @@ def _data_file(filename: str) -> str:
 
 
 class LeadReq(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
     email: EmailStr
-    phone: constr(pattern=r"^\+?[0-9]{10,15}$") | None = Field(default=None)
-    vehicle_type: str | None = None
-    price: float | None = None
-    affiliate: str | None = None
+    phone: Optional[str] = Field(default=None, pattern=r"^\+?[0-9]{10,15}$")
+    vehicle_type: Optional[str] = None
+    price: Optional[float] = None
+    affiliate: Optional[str] = None
 
 
 class LeadResp(BaseModel):
@@ -101,7 +102,7 @@ class LeadResp(BaseModel):
 @app.post("/api/leads", response_model=LeadResp)
 def create_lead(lead: LeadReq):
     leads_file = _data_file("leads.json")
-    lead_entry = lead.dict()
+    lead_entry = lead.model_dump()
     lead_entry["timestamp"] = datetime.utcnow().isoformat()
     if os.path.exists(leads_file):
         with open(leads_file) as f:
@@ -115,7 +116,7 @@ def create_lead(lead: LeadReq):
 
 
 class TrackReq(BaseModel):
-    affiliate: str
+    affiliate: str = Field(min_length=1)
 
 
 class TrackResp(BaseModel):
@@ -125,7 +126,7 @@ class TrackResp(BaseModel):
 @app.post("/api/track", response_model=TrackResp)
 def track_click(track: TrackReq):
     track_file = _data_file("tracks.json")
-    entry = {"affiliate": track.affiliate, "timestamp": datetime.utcnow().isoformat()}
+    entry = track.model_dump()
     if os.path.exists(track_file):
         with open(track_file) as f:
             data = json.load(f)

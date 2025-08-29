@@ -11,7 +11,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set environment variables
         run: |
-          echo "DOMAIN=${{ secrets.DOMAIN }}" >> $GITHUB_ENV
+          echo "APEX_HOST=${{ secrets.APEX_HOST }}" >> $GITHUB_ENV
+          echo "WWW_HOST=${{ secrets.WWW_HOST }}" >> $GITHUB_ENV
           echo "EMAIL=${{ secrets.EMAIL }}" >> $GITHUB_ENV
+      - name: Verify environment file
+        run: ./check-env.sh
       - name: Run deploy script
         run: ./deploy.sh --build --pull
+      - name: Health check
+        run: |
+          apex=$(grep '^APEX_HOST=' .env | cut -d= -f2)
+          www=$(grep '^WWW_HOST=' .env | cut -d= -f2)
+          api_status=$(curl -s -o /dev/null -w "%{http_code}" https://$apex/api/health)
+          root_status=$(curl -s -o /dev/null -w "%{http_code}" https://$www/)
+          echo "API status: $api_status"
+          echo "Root status: $root_status"
+          if [[ "$api_status" -ge 500 || "$root_status" -ge 500 ]]; then
+            echo "Health check failed" >&2
+            exit 1
+          fi
