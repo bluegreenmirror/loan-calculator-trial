@@ -370,11 +370,8 @@ body {
 .pie-chart canvas {
   width: 100%;
   height: 100%;
-  transform: perspective(800px) rotateX(20deg);
-  transform-origin: center;
   transition: transform 0.6s;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-  /* Keep canvas square so external tooltips aren't clipped */
+  /* Flatten canvas so it blends with the card and keep it square for external tooltips */
 }
 
 .pie-chart canvas.bounce {
@@ -383,10 +380,10 @@ body {
 
 @keyframes chart-bounce {
   0%, 100% {
-    transform: perspective(800px) rotateX(20deg) scale(1);
+    transform: scale(1);
   }
   50% {
-    transform: perspective(800px) rotateX(20deg) scale(1.05);
+    transform: scale(1.05);
   }
 }
 
