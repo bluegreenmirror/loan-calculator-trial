@@ -122,6 +122,7 @@ sed -i 's/admin@example.com/you@your-domain.tld/' .env
 ```
 
 Notes:
+
 - `--verify` runs `make verify` which uses a Python virtualenv and dev tools. The script will create `.venv` and install from `requirements-dev.txt` when `--verify` is provided.
 - If Docker requires sudo on first run, the script falls back to `sudo docker`. After bootstrapping, log out and log back in (or run `newgrp docker`).
 

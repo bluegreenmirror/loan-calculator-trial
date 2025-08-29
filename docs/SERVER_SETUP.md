@@ -13,6 +13,7 @@ keep verification in CI and local dev.
 ## Prerequisites
 
 - A domain pointing to your server (`A`/`AAAA` DNS records).
+
 - A copy of the repo on the server and a configured `.env`:
 
   ```bash
@@ -102,4 +103,3 @@ TLS_DIRECTIVE=tls ${EMAIL}
 - Do not commit secrets. Use `.env` locally and provider secrets in CI.
 - Keep servers minimal: prefer Option 2 for deploys; rely on CI for code checks.
 - Regularly update Docker base images and rotate credentials.
-
