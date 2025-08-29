@@ -27,7 +27,7 @@ class QuoteReq(BaseModel):
     vehicle_price: float = Field(..., gt=0)
     down_payment: float = 0
     apr: float = Field(..., ge=0)
-    term_months: int = Field(..., ge=0)
+    term_months: int = Field(..., gt=0)
     tax_rate: float = 0.0
     fees: float = 0.0
     trade_in_value: float = 0.0
@@ -87,7 +87,7 @@ def _data_file(filename: str) -> str:
 
 
 class LeadReq(BaseModel):
-    name: str = Field(strip_whitespace=True, min_length=1)
+    name: str = Field(min_length=1)
     email: EmailStr
     phone: Optional[str] = Field(default=None, pattern=r"^\+?[0-9]{10,15}$")
     vehicle_type: Optional[str] = None
@@ -116,7 +116,7 @@ def create_lead(lead: LeadReq):
 
 
 class TrackReq(BaseModel):
-    affiliate: str = Field(strip_whitespace=True, min_length=1)
+    affiliate: str = Field(min_length=1)
 
 
 class TrackResp(BaseModel):

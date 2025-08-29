@@ -99,20 +99,38 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
-Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
+Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `DOMAIN`, `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
 
-1. Point DNS to your server.
+For a step‑by‑step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
 
-1. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
+Server setup (Ubuntu/Debian):
 
-1. In `.env`, set:
+```bash
+# One‑time: copy env and set values
+cp .env.example .env
+sed -i 's/example.com/your-domain.tld/' .env
+sed -i 's/admin@example.com/you@your-domain.tld/' .env
 
-   ```bash
-   ADDR=${DOMAIN}
-   TLS_DIRECTIVE=tls ${EMAIL}
-   ```
+# Optional: bootstrap server prerequisites (Docker, Compose, make, Python venv)
+./deploy.sh --bootstrap
 
-1. Run `./deploy.sh --build`.
+# Build and deploy (skips linters/tests by default on servers)
+./deploy.sh --build --pull
+
+# To include linters/tests on the server, add --verify
+./deploy.sh --build --pull --verify
+```
+
+Notes:
+
+- `--verify` runs `make verify` which uses a Python virtualenv and dev tools. The script will create `.venv` and install from `requirements-dev.txt` when `--verify` is provided.
+- If Docker requires sudo on first run, the script falls back to `sudo docker`. After bootstrapping, log out and log back in (or run `newgrp docker`).
+
+Manual health check after deploy:
+
+```bash
+curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
+```
 
 ## Testing
 
@@ -124,6 +142,21 @@ make verify  # or `make test` to run tests only
 ```
 
 `deploy.sh --build` automatically runs `make verify`.
+
+### External checks
+
+Some tests depend on external services (for example, an already running Caddy on your machine). These are disabled by default and can be enabled explicitly:
+
+```bash
+# Run everything, including external checks
+pytest --run-external
+
+# Optional: point the Caddy health check at a custom URL
+CADDY_HEALTH_URL=http://localhost:8080 pytest --run-external
+
+# Run only fast, hermetic tests (default behavior)
+pytest -k 'not external'
+```
 
 ## Linting & Formatting
 
@@ -154,6 +187,14 @@ make verify  # or `make test` to run tests only
   # or
   make lint-docker
   ```
+
+- Caddyfile validation:
+
+  - `make lint-caddy` validates the `Caddyfile` using the official `caddy:2.8` image. It loads environment variables from `.env` if present, otherwise falls back to `.env.example`. This allows CI to validate without requiring secrets. Ensure `ADDR` and `TLS_DIRECTIVE` are present in one of these files when running locally.
+
+## Continuous Integration
+
+Pull requests trigger GitHub Actions to run linters and build all Docker images.
 
 ## Repository layout
 

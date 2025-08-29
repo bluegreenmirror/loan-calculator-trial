@@ -12,8 +12,8 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
-        additional_dependencies: [pydantic]
-  - repo: https://github.com/pre-commit/mirrors-yamllint
+        additional_dependencies: [pydantic, types-requests]
+  - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.35.1
     hooks:
       - id: yamllint
