@@ -27,7 +27,7 @@ class QuoteReq(BaseModel):
     vehicle_price: float = Field(..., gt=0)
     down_payment: float = 0
     apr: float = Field(..., ge=0)
-    term_months: int = Field(..., ge=0)
+    term_months: int = Field(..., gt=0)
     tax_rate: float = 0.0
     fees: float = 0.0
     trade_in_value: float = 0.0
