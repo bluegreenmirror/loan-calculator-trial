@@ -1,7 +1,8 @@
 import json
+
 import pytest
-from pydantic import ValidationError
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from api.app import LeadReq, app
 
