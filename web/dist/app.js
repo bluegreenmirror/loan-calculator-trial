@@ -132,8 +132,10 @@ function updateChart(principal, interest) {
         animation: false,
         maintainAspectRatio: false,
         layout: {
-          // Small padding so external tooltips have room without shrinking the chart
-          padding: 8
+          // Give the canvas breathing room so our custom outside tooltip
+          // isn't clipped by the chart area. Without enough padding the
+          // caret ends up inside the pie and looks cut off.
+          padding: 24
         },
         plugins: {
           legend: { display: false },

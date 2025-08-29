@@ -7,7 +7,7 @@ Jump‑start your next ride with a fast, responsive vehicle loan payment calcula
 ## Features
 
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
-- 📊 **Cost breakdown chart**: flat pie chart sized between 200–260px with generous side padding, highlighting principal vs interest; tooltips float outside each slice and the caret points back at the chart without getting cut off, with the legend beside it.
+- 📊 **Cost breakdown chart**: flat pie chart sized between 200–260px with generous side and canvas padding, highlighting principal vs interest; tooltips float outside each slice and the caret points back at the chart without getting cut off, with the legend beside it.
 - 🎰 **Rolling digits**: payment amounts animate with fast, smooth scrolling numbers.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
 - 👨‍⚖️ **Lead capture**: name/email/phone validated and persisted (+ affiliate/UTM captured automatically).
