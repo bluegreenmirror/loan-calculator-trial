@@ -374,7 +374,7 @@ body {
   transform-origin: center;
   transition: transform 0.6s;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-  border-radius: 50%;
+  /* Keep canvas square so external tooltips aren't clipped */
 }
 
 .pie-chart canvas.bounce {
