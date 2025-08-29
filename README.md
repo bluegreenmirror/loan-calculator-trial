@@ -101,18 +101,35 @@ Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
 Merges to `main` trigger a GitHub Actions workflow that runs `./deploy.sh --build --pull`. Set repository secrets `DOMAIN` and `EMAIL` beforehand.
 
-1. Point DNS to your server.
+For a step‑by‑step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
 
-1. Ensure repository secrets `DOMAIN` and `EMAIL` are configured in GitHub.
+Server setup (Ubuntu/Debian):
 
-1. In `.env`, set:
+```bash
+# One‑time: copy env and set values
+cp .env.example .env
+sed -i 's/example.com/your-domain.tld/' .env
+sed -i 's/admin@example.com/you@your-domain.tld/' .env
 
-   ```bash
-   ADDR=${DOMAIN}
-   TLS_DIRECTIVE=tls ${EMAIL}
-   ```
+# Optional: bootstrap server prerequisites (Docker, Compose, make, Python venv)
+./deploy.sh --bootstrap
 
-1. Run `./deploy.sh --build`.
+# Build and deploy (skips linters/tests by default on servers)
+./deploy.sh --build --pull
+
+# To include linters/tests on the server, add --verify
+./deploy.sh --build --pull --verify
+```
+
+Notes:
+- `--verify` runs `make verify` which uses a Python virtualenv and dev tools. The script will create `.venv` and install from `requirements-dev.txt` when `--verify` is provided.
+- If Docker requires sudo on first run, the script falls back to `sudo docker`. After bootstrapping, log out and log back in (or run `newgrp docker`).
+
+Manual health check after deploy:
+
+```bash
+curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
+```
 
 ## Testing
 
