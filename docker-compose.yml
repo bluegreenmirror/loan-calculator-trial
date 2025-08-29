@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.lint
-    image: loancalc/lint:latest
+    profiles: ["dev"]
     # Building this service runs all linters at build-time
   caddy:
     image: caddy:2.8
