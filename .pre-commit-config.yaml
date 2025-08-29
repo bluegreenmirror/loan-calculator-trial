@@ -3,8 +3,23 @@ repos:
     rev: v0.6.4
     hooks:
       - id: ruff
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        args: ["--check"]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
     hooks:
       - id: mypy
-        additional_dependencies: [pydantic]
+        additional_dependencies: [pydantic, types-requests]
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        args: ["--check"]
+        additional_dependencies: [mdformat-gfm]

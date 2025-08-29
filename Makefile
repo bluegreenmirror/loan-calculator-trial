@@ -1,12 +1,18 @@
 SHELL := /bin/bash
 VENV_PREFIX = .venv/bin/
 
-.PHONY: lint format lint-python lint-yaml lint-md lint-docker
+# Prefer local .env, fall back to .env.example for CI
+ENV_FILE := $(firstword $(wildcard .env .env.example))
+DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 
-lint: lint-python lint-yaml lint-md ## Run all linters
+.PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify
 
-format: ## Auto-format Python and Markdown
+lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
+
+format: format-caddy format-md ## Auto-format Python and Markdown
 	$(VENV_PREFIX)black api
+
+format-md: ## Auto-format Markdown files
 	$(VENV_PREFIX)mdformat README.md docs || true
 
 lint-python: ## Ruff + Black check
@@ -22,5 +28,16 @@ lint-md: ## mdformat --check
 lint-docker: ## Build lint image which runs checks at build-time
 	docker build -f Dockerfile.lint .
 
+lint-caddy: ## Validate Caddyfile syntax
+	docker run --rm $(DOCKER_ENV_FLAG) -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2.8 caddy validate --config /etc/caddy/Caddyfile
+
+format-caddy: ## Format Caddyfile
+	docker run --rm -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile caddy:2.8 caddy fmt --overwrite /etc/caddy/Caddyfile
+
+test: ## Run unit and integration tests
+	$(VENV_PREFIX)pytest
+
+verify: lint test ## Lint and run tests
+
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}' | sort
+	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $1, $2}' | sort

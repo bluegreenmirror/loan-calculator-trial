@@ -80,10 +80,10 @@
 ## 🎯 **User Journey**
 
 1. **Landing**: Professional header with clear value proposition
-2. **Calculator**: Easy-to-use form with smart presets
-3. **Results**: Clear, visual presentation of vehicle loan details
-4. **Lead Capture**: Professional form for follow-up
-5. **Trust Building**: Security indicators and social proof
+1. **Calculator**: Easy-to-use form with smart presets
+1. **Results**: Clear, visual presentation of vehicle loan details
+1. **Lead Capture**: Professional form for follow-up
+1. **Trust Building**: Security indicators and social proof
 
 ## 🚀 **Ready for Production**
 
