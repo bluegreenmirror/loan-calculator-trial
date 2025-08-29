@@ -9,9 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set environment variables
+      - name: Write .env from secrets
         run: |
-          echo "DOMAIN=${{ secrets.DOMAIN }}" >> $GITHUB_ENV
-          echo "EMAIL=${{ secrets.EMAIL }}" >> $GITHUB_ENV
+          cat <<'EOT' > .env
+          DOMAIN=${{ secrets.DOMAIN }}
+          EMAIL=${{ secrets.EMAIL }}
+          APEX_HOST=${{ secrets.APEX_HOST }}
+          WWW_HOST=${{ secrets.WWW_HOST }}
+          EOT
+      - name: Verify environment
+        run: ./scripts/check-env.sh
       - name: Run deploy script
         run: ./deploy.sh --build --pull
+      - name: Run health checks
+        run: ./scripts/health-check.sh

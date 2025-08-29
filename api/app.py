@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field, constr
+from pydantic import BaseModel, EmailStr, Field
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
 
@@ -87,9 +87,9 @@ def _data_file(filename: str) -> str:
 
 
 class LeadReq(BaseModel):
-    name: constr(strip_whitespace=True, min_length=1)
+    name: str = Field(min_length=1)
     email: EmailStr
-    phone: Optional[constr(pattern=r"^\+?[0-9]{10,15}$")] = Field(default=None)
+    phone: Optional[str] = Field(default=None, pattern=r"^\+?[0-9]{10,15}$")
     vehicle_type: Optional[str] = None
     price: Optional[float] = None
     affiliate: Optional[str] = None
@@ -102,7 +102,7 @@ class LeadResp(BaseModel):
 @app.post("/api/leads", response_model=LeadResp)
 def create_lead(lead: LeadReq):
     leads_file = _data_file("leads.json")
-    lead_entry = lead.dict()
+    lead_entry = lead.model_dump()
     lead_entry["timestamp"] = datetime.utcnow().isoformat()
     if os.path.exists(leads_file):
         with open(leads_file) as f:
@@ -116,7 +116,7 @@ def create_lead(lead: LeadReq):
 
 
 class TrackReq(BaseModel):
-    affiliate: constr(strip_whitespace=True, min_length=1)
+    affiliate: str = Field(min_length=1)
 
 
 class TrackResp(BaseModel):
@@ -126,7 +126,7 @@ class TrackResp(BaseModel):
 @app.post("/api/track", response_model=TrackResp)
 def track_click(track: TrackReq):
     track_file = _data_file("tracks.json")
-    entry = {"affiliate": track.affiliate, "timestamp": datetime.utcnow().isoformat()}
+    entry = track.model_dump()
     if os.path.exists(track_file):
         with open(track_file) as f:
             data = json.load(f)
