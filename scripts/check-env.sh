@@ -6,7 +6,7 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-required_vars=(APEX_HOST WWW_HOST EMAIL DOMAIN)
+required_vars=(APEX_HOST WWW_HOST EMAIL ALLOWED_ORIGINS)
 missing=0
 
 for var in "${required_vars[@]}"; do

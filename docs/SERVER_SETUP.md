@@ -18,7 +18,7 @@ keep verification in CI and local dev.
 
   ```bash
   cp .env.example .env
-  # Edit DOMAIN and EMAIL to match your setup
+  # Edit APEX_HOST, WWW_HOST, EMAIL, and ALLOWED_ORIGINS to match your setup
   ```
 
 ## Bootstrap the server (one time)
@@ -45,7 +45,7 @@ Steps:
 ./deploy.sh --build --pull
 
 # Check health
-curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
+curl -I -H "Host:$(grep ^APEX_HOST .env | cut -d= -f2)" http://localhost
 ```
 
 Why choose this option:
@@ -74,17 +74,10 @@ Notes:
 
 Key variables in `.env`:
 
-- `DOMAIN`: your domain (used by Caddy and health checks)
+- `APEX_HOST`: root domain
+- `WWW_HOST`: main site domain
 - `EMAIL`: Let’s Encrypt contact (for TLS in production)
-- `ADDR`: `:80` for local HTTP, `${DOMAIN}` for production
-- `TLS_DIRECTIVE`: empty for local; `tls ${EMAIL}` in production
-
-Example production values:
-
-```env
-ADDR=${DOMAIN}
-TLS_DIRECTIVE=tls ${EMAIL}
-```
+- `ALLOWED_ORIGINS`: comma-separated CORS origins
 
 ## Troubleshooting
 

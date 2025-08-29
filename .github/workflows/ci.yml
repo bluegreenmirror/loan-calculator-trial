@@ -40,3 +40,31 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Docker images
         run: docker compose build
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create .env
+        run: |
+          cat <<'EOT' > .env
+          APEX_HOST=example.com
+          WWW_HOST=www.example.com
+          EMAIL=admin@example.com
+          ALLOWED_ORIGINS=http://example.com
+          EOT
+      - name: Start services
+        run: docker compose up -d
+      - name: Curl Caddy
+        env:
+          APEX_HOST: example.com
+        run: curl -I -H "Host:${APEX_HOST}" http://localhost
+      - name: Run smoke tests
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements-dev.txt
+          pytest tests/test_smoke.py
+      - name: Tear down
+        if: always()
+        run: docker compose down

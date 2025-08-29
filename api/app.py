@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, constr
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
 
@@ -89,7 +89,7 @@ def _data_file(filename: str) -> str:
 class LeadReq(BaseModel):
     name: str = Field(min_length=1)
     email: EmailStr
-    phone: Optional[str] = Field(default=None, pattern=r"^\+?[0-9]{10,15}$")
+    phone: Optional[constr(pattern=r"^\+?[0-9]{10,15}$")] = None
     vehicle_type: Optional[str] = None
     price: Optional[float] = None
     affiliate: Optional[str] = None

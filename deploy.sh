@@ -27,7 +27,18 @@ for arg in "$@"; do
 done
 
 if [ ! -f ".env" ]; then
-  echo "Missing .env. Create it with DOMAIN and EMAIL."; exit 1
+  if [ -n "${APEX_HOST:-}" ] && [ -n "${WWW_HOST:-}" ] && [ -n "${EMAIL:-}" ]; then
+    cat > .env <<EOT
+APEX_HOST=${APEX_HOST}
+WWW_HOST=${WWW_HOST}
+EMAIL=${EMAIL}
+HSTS_LINE=${HSTS_LINE:-}
+ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
+PERSIST_DIR=${PERSIST_DIR:-/data}
+EOT
+  else
+    echo "Missing .env and required variables (APEX_HOST, WWW_HOST, EMAIL)."; exit 1
+  fi
 fi
 
 if [ $BOOTSTRAP -eq 1 ]; then
@@ -105,6 +116,6 @@ fi
 
 echo "Deployed. Checking health..."
 sleep 5
-domain=$(grep ^DOMAIN .env | cut -d= -f2)
-status=$(curl -Is http://$domain | head -n 1 | sed 's/\r$//')
+domain=$(grep ^APEX_HOST .env | cut -d= -f2)
+status=$(curl -Is -H "Host:$domain" http://localhost | head -n 1 | sed 's/\r$//')
 echo "$status"

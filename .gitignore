@@ -1,4 +1,4 @@
-# Environment variables
+# Environment variables (keep local secrets out of version control)
 .env
 *.env.*
 !*.env.example

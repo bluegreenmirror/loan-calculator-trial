@@ -25,15 +25,15 @@ cd loan-calculator-trial
 
 # Set environment for local dev
 cp .env.example .env
-# Edit DOMAIN and EMAIL in .env
+# Edit APEX_HOST, WWW_HOST, EMAIL, and ALLOWED_ORIGINS in .env
 
 # Run the stack
 ./deploy.sh --build
 
-# Open https://$DOMAIN
+# Open https://$WWW_HOST
 ```
 
-Set `DOMAIN` to your hostname and `EMAIL` to the address used for Let's Encrypt certificates.
+Set `APEX_HOST` and `WWW_HOST` to your hostnames and `EMAIL` to the address used for Let's Encrypt certificates.
 
 ## API
 
@@ -81,17 +81,18 @@ All settings live in `.env`:
 
 | var             | dev                 | prod                  | note                         |
 | --------------- | ------------------- | --------------------- | ---------------------------- |
-| `DOMAIN`        | `example.com`       | your domain           | Used by deploy script        |
+| `APEX_HOST`     | `example.com`       | apex domain           | Root host that redirects     |
+| `WWW_HOST`      | `www.example.com`   | `www.yourdomain`      | Main site hostname           |
 | `EMAIL`         | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
-| `ADDR`          | `:80`               | `${DOMAIN}`           | Caddy site address           |
-| `TLS_DIRECTIVE` | _(empty)_           | `tls ${EMAIL}`        | Enables HTTPS in prod        |
+| `HSTS_LINE`     | _(empty)_           | `header Strict-Transport-Security "max-age=31536000"` | Optional HSTS header |
 | `PERSIST_DIR`   | `/data`             | `/data` or custom dir | Persisted lead/track storage |
+| `ALLOWED_ORIGINS` | `https://example.com,https://www.example.com` | comma-separated origins | Allowed CORS origins         |
 
 ## CORS configuration
 
 The API exposes configuration for cross‑origin requests via the `ALLOWED_ORIGINS` environment variable. Set this to a comma‑separated list of origins that are permitted to access the API (for example,
 
-`ALLOWED_ORIGINS="https://example.com,http://localhost:8080"`).
+`ALLOWED_ORIGINS="https://example.com,https://www.example.com"`).
 
 If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by default to reduce the risk of malicious sites interacting with the service.
 
@@ -99,7 +100,7 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
-Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `DOMAIN`, `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
+Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
 
 For a step‑by‑step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
 
@@ -109,6 +110,7 @@ Server setup (Ubuntu/Debian):
 # One‑time: copy env and set values
 cp .env.example .env
 sed -i 's/example.com/your-domain.tld/' .env
+sed -i 's/www.example.com/www.your-domain.tld/' .env
 sed -i 's/admin@example.com/you@your-domain.tld/' .env
 
 # Optional: bootstrap server prerequisites (Docker, Compose, make, Python venv)
@@ -129,7 +131,7 @@ Notes:
 Manual health check after deploy:
 
 ```bash
-curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
+curl -I http://$(grep ^APEX_HOST .env | cut -d= -f2)
 ```
 
 ## Testing

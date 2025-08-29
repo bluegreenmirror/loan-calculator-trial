@@ -13,10 +13,10 @@ services:
       - "443:443"
     env_file: .env
     environment:
-      - DOMAIN=${DOMAIN}
+      - APEX_HOST=${APEX_HOST}
+      - WWW_HOST=${WWW_HOST}
       - EMAIL=${EMAIL}
-      - ADDR=${ADDR}
-      - TLS_DIRECTIVE=${TLS_DIRECTIVE}
+      - HSTS_LINE=${HSTS_LINE}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -30,8 +30,11 @@ services:
   api:
     build: ./api
     restart: unless-stopped
+    environment:
+      - PERSIST_DIR=/data
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     volumes:
-      - data:/data
+      - leads_data:/data
     networks:
       - loancalc
 
@@ -45,7 +48,7 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  data:
+  leads_data:
 
 networks:
   loancalc:

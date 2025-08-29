@@ -53,7 +53,7 @@ We follow Conventional Commits:
 ## Environment
 
 - Use `.env.example` for reference, never commit real secrets.
-- Dev mode: set `DOMAIN=localhost` and `EMAIL=admin@example.com`.
+- Dev mode: set `APEX_HOST=localhost`, `WWW_HOST=localhost`, and `EMAIL=admin@example.com`.
 - Prod mode: real domain with TLS.
 
 ## Testing

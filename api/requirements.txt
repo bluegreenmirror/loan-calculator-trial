@@ -1,0 +1,4 @@
+fastapi==0.110.1
+pydantic==2.7.4
+email-validator==2.1.1
+uvicorn[standard]==0.29.0

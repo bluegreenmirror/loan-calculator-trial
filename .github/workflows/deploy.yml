@@ -12,10 +12,12 @@ jobs:
       - name: Write .env from secrets
         run: |
           cat <<'EOT' > .env
-          DOMAIN=${{ secrets.DOMAIN }}
-          EMAIL=${{ secrets.EMAIL }}
           APEX_HOST=${{ secrets.APEX_HOST }}
           WWW_HOST=${{ secrets.WWW_HOST }}
+          EMAIL=${{ secrets.EMAIL }}
+          HSTS_LINE=${{ secrets.HSTS_LINE }}
+          ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
+          PERSIST_DIR=/data
           EOT
       - name: Verify environment
         run: ./scripts/check-env.sh

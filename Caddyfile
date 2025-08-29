@@ -1,7 +1,20 @@
-{$ADDR} {
-	reverse_proxy /api/* api:8000
-	root * /srv
-	try_files {path} {path}/index.html
-	file_server 
-	{$TLS_DIRECTIVE}
+{$APEX_HOST}, {$WWW_HOST} {
+  @apex host {$APEX_HOST}
+  handle @apex {
+    redir https://{$WWW_HOST}{uri} permanent
+  }
+
+  @api path /api/*
+  handle @api {
+    reverse_proxy api:8000
+  }
+
+  handle {
+    root * /srv
+    try_files {path} {path}/index.html
+    file_server
+  }
+
+  tls {$EMAIL}
+  {$HSTS_LINE}
 }
