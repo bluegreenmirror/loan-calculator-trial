@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 VENV_PREFIX = .venv/bin/
 
-.PHONY: lint format lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy
+.PHONY: lint format lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
 
@@ -27,6 +27,11 @@ lint-caddy: ## Validate Caddyfile syntax
 
 format-caddy: ## Format Caddyfile
 	docker run --rm -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile caddy:2.8 caddy fmt --overwrite /etc/caddy/Caddyfile
+
+test: ## Run unit and integration tests
+	$(VENV_PREFIX)pytest
+
+verify: lint test ## Lint and run tests
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $1, $2}' | sort
