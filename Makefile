@@ -5,7 +5,7 @@ VENV_PREFIX = .venv/bin/
 ENV_FILE := $(firstword $(wildcard .env .env.example))
 DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 
-.PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify
+.PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
 
@@ -41,3 +41,10 @@ verify: lint test ## Lint and run tests
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $1, $2}' | sort
+
+build-dev: ## Build dev images (runs verify, builds all services)
+	$(MAKE) verify
+	docker compose build --pull
+
+build-release: ## Build release images (api + web only; no dev tooling)
+	docker compose build --pull api web

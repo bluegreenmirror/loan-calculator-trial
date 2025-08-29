@@ -95,6 +95,14 @@ The API exposes configuration for cross‑origin requests via the `ALLOWED_ORIGI
 
 If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by default to reduce the risk of malicious sites interacting with the service.
 
+## Build Modes
+
+- `make build-dev`: Runs local linters/tests, then builds all services (including the `lint` image). Intended for developer machines.
+- `make build-release`: Builds only runtime images (`api`, `web`) — no dev tooling. Intended for servers/CI deploy artifacts.
+- Scripts:
+  - `scripts/build-dev.sh`: Wrapper for `make build-dev`.
+  - `scripts/build-release.sh`: Wrapper for `make build-release`.
+
 ## Deploying
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.

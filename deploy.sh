@@ -90,7 +90,8 @@ if [ $BUILD -eq 1 ]; then
   else
     echo "Skipping verification (linters/tests). Use --verify to enable."
   fi
-  $DOCKER_CMD compose build --pull
+  # Build only runtime services for a lightweight production image set
+  $DOCKER_CMD compose build --pull api web
 fi
 
 # Start or update containers
@@ -109,8 +110,16 @@ for i in {1..20}; do
   sleep 1
 done
 
-# Run lint and tests after services are up so Caddy health test passes
-make verify
+# Optionally run linters/tests after services are up
+if [ $VERIFY -eq 1 ]; then
+  if ! command -v make >/dev/null 2>&1; then
+    echo "make is required for --verify. Install it or re-run without --verify."; exit 1
+  fi
+  ensure_venv_and_deps
+  make verify
+else
+  echo "Skipping verification (linters/tests). Use --verify to enable."
+fi
 
 if [ $PRUNE -eq 1 ]; then
   $DOCKER_CMD image prune -f
