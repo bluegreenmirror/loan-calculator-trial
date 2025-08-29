@@ -91,10 +91,15 @@ function animateNumber(el, value) {
 
 let costChart;
 
+// Grab Chart.js' Tooltip helper so we can extend it. When using the CDN build
+// the helper lives on the global `Chart` object.
+const { Tooltip } = Chart;
+
 // Custom tooltip positioner that places the tooltip outside the pie slice.
 // Without this, Chart.js centers the tooltip on the slice, leaving the caret
-// inside the chart where it gets clipped.
-Chart.Tooltip.positioners.outside = function(items) {
+// inside the chart where it gets clipped. Attaching our function to
+// `Tooltip.positioners` registers the new option value `position: 'outside'`.
+Tooltip.positioners.outside = function (items) {
   if (!items.length) return false;
   const arc = items[0].element;
   const angle = (arc.startAngle + arc.endAngle) / 2;

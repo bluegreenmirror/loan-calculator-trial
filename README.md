@@ -7,7 +7,7 @@ Jump‑start your next ride with a fast, responsive vehicle loan payment calcula
 ## Features
 
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
-- 📊 **Cost breakdown chart**: smooth 3D pie chart with a CSS bounce effect highlighting principal vs interest, with the legend displayed outside the chart.
+- 📊 **Cost breakdown chart**: smooth 3D pie chart with a CSS bounce effect highlighting principal vs interest, with tooltips floating outside the chart and the legend displayed beside it.
 - 🎰 **Rolling digits**: payment amounts animate with fast, smooth scrolling numbers.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
 - 👨‍⚖️ **Lead capture**: name/email/phone validated and persisted (+ affiliate/UTM captured automatically).
