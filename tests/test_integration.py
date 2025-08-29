@@ -13,7 +13,10 @@ def live_server(tmp_path_factory):
     env = os.environ.copy()
     env["PERSIST_DIR"] = str(data_dir)
     proc = subprocess.Popen(
-        ["uvicorn", "api.app:app", "--port", "8001"], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ["uvicorn", "api.app:app", "--port", "8001"],
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     time.sleep(1)
     yield "http://127.0.0.1:8001", data_dir

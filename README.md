@@ -155,6 +155,14 @@ make verify  # or `make test` to run tests only
   make lint-docker
   ```
 
+- Caddyfile validation:
+
+  - `make lint-caddy` validates the `Caddyfile` using the official `caddy:2.8` image. It loads environment variables from `.env` if present, otherwise falls back to `.env.example`. This allows CI to validate without requiring secrets. Ensure `ADDR` and `TLS_DIRECTIVE` are present in one of these files when running locally.
+
+## Continuous Integration
+
+Pull requests trigger GitHub Actions to run linters and build all Docker images.
+
 ## Repository layout
 
 ```md

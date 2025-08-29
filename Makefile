@@ -1,6 +1,10 @@
 SHELL := /bin/bash
 VENV_PREFIX = .venv/bin/
 
+# Prefer local .env, fall back to .env.example for CI
+ENV_FILE := $(firstword $(wildcard .env .env.example))
+DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
+
 .PHONY: lint format lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
@@ -23,7 +27,7 @@ lint-docker: ## Build lint image which runs checks at build-time
 	docker build -f Dockerfile.lint .
 
 lint-caddy: ## Validate Caddyfile syntax
-	docker run --rm --env-file .env -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2.8 caddy validate --config /etc/caddy/Caddyfile
+	docker run --rm $(DOCKER_ENV_FLAG) -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2.8 caddy validate --config /etc/caddy/Caddyfile
 
 format-caddy: ## Format Caddyfile
 	docker run --rm -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile caddy:2.8 caddy fmt --overwrite /etc/caddy/Caddyfile
