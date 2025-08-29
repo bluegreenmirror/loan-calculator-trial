@@ -5,12 +5,14 @@ VENV_PREFIX = .venv/bin/
 ENV_FILE := $(firstword $(wildcard .env .env.example))
 DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 
-.PHONY: lint format lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify
+.PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
 
-format: format-caddy ## Auto-format Python and Markdown
+format: format-caddy format-md ## Auto-format Python and Markdown
 	$(VENV_PREFIX)black api
+
+format-md: ## Auto-format Markdown files
 	$(VENV_PREFIX)mdformat README.md docs || true
 
 lint-python: ## Ruff + Black check
