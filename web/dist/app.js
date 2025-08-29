@@ -91,6 +91,20 @@ function animateNumber(el, value) {
 
 let costChart;
 
+// Custom tooltip positioner that places the tooltip outside the pie slice.
+// Without this, Chart.js centers the tooltip on the slice, leaving the caret
+// inside the chart where it gets clipped.
+Chart.Tooltip.positioners.outside = function(items) {
+  if (!items.length) return false;
+  const arc = items[0].element;
+  const angle = (arc.startAngle + arc.endAngle) / 2;
+  const offset = 16; // pixels away from the outer edge of the pie
+  return {
+    x: arc.x + Math.cos(angle) * (arc.outerRadius + offset),
+    y: arc.y + Math.sin(angle) * (arc.outerRadius + offset)
+  };
+};
+
 function updateChart(principal, interest) {
   if (principal + interest === 0) return;
 
@@ -110,8 +124,16 @@ function updateChart(principal, interest) {
       options: {
         animation: false,
         maintainAspectRatio: false,
+        layout: {
+          // Pad canvas so our external tooltips have room to render
+          padding: 24
+        },
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            // Float tooltip outside the pie using the custom positioner above
+            position: 'outside'
+          }
         }
       }
     });
