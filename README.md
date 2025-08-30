@@ -71,16 +71,19 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
 This project supports blue‑green deployment to minimize downtime. See [Release Process](RELEASE_PROCESS.md) for full details. Quick reference:
 
 - Production prerequisites:
+
   - `.env` has: `DOMAIN`, `APEX_HOST`, `WWW_HOST`, `EMAIL`, and `TLS_DIRECTIVE=tls ${EMAIL}`.
   - One‑time infra: `docker network create edge-net` and `docker volume create edge_caddy_data`.
   - Cloudflare (if used): SSL/TLS mode “Full” or “Full (strict)”, apex/www DNS → server IP.
 
 - Deploy and validate:
+
   - Deploy blue: `./deploy.sh blue`
   - Validate prod: `make validate-prod`
   - Switch to green: `./deploy.sh green`
 
 - Local validation:
+
   - `make validate-local` brings up a color stack, points edge to it, and verifies:
     - `http://localhost` returns HTML
     - `http://localhost/api/health` returns `{ "ok": true }`

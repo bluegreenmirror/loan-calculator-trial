@@ -7,14 +7,14 @@
 # }
 
 {$APEX_HOST} {
-    reverse_proxy ##LIVE_UPSTREAM##
+	reverse_proxy ##LIVE_UPSTREAM##
 }
 
 {$WWW_HOST} {
-    redir https://{$APEX_HOST}{uri}
+	redir https://{$APEX_HOST}{uri}
 }
 
 # Local development convenience: serve http://localhost to the live upstream
 localhost {
-    reverse_proxy ##LIVE_UPSTREAM##
+	reverse_proxy ##LIVE_UPSTREAM##
 }
