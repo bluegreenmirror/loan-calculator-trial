@@ -49,6 +49,7 @@ We follow Conventional Commits:
 - HTML/JS: Prettier defaults, semantic HTML.
 - YAML: 2-space indentation
 - Run `pre-commit run --all-files` or `make lint` before committing.
+- Run `make test` to ensure the test suite passes.
 
 ## Environment
 
@@ -58,6 +59,8 @@ We follow Conventional Commits:
 
 ## Testing
 
+- Run `make test` to execute unit and integration tests.
+- Optionally run `make verify` to include linting.
 - Backend: test with curl requests.
 - Frontend: load http://localhost and verify calculator + lead form.
 

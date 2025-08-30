@@ -26,10 +26,6 @@ for arg in "$@"; do
   esac
 done
 
-if [ ! -f ".env" ]; then
-  echo "Missing .env. Create it with DOMAIN and EMAIL."; exit 1
-fi
-
 if [ $BOOTSTRAP -eq 1 ]; then
   echo "Bootstrapping server prerequisites..."
   if command -v apt-get >/dev/null 2>&1; then
@@ -101,19 +97,12 @@ if ! DockerComposeUpOutput=$($DOCKER_CMD compose up -d 2>&1); then
   exit 1
 fi
 
-domain=$(grep ^DOMAIN .env | cut -d= -f2)
-tls_directive=$(grep ^TLS_DIRECTIVE .env | cut -d= -f2- || true)
-
-# Prefer HTTPS health check when TLS is enabled
-if [ -n "${tls_directive}" ]; then
-  health_url="https://$domain"
-else
-  health_url="http://$domain"
-fi
+domain=$(grep ^DOMAIN .env 2>/dev/null | cut -d= -f2 || echo "localhost")
+health_url="http://$domain"
 
 echo "Waiting for Caddy at ${health_url} ..."
 for i in {1..30}; do
-  if curl -k -L -sSf -o /dev/null "$health_url"; then
+  if curl -L -sSf -o /dev/null "$health_url"; then
     echo "Caddy is up."
     break
   fi
@@ -138,12 +127,5 @@ fi
 echo "Deployed. Checking health..."
 sleep 2
 
-# Report both HTTP and HTTPS statuses for clarity
-status_http=$(curl -Is http://$domain | head -n 1 | sed 's/\r$//')
-status_https=$(curl -k -Is https://$domain | head -n 1 | sed 's/\r$//')
-echo "HTTP:  $status_http"
-echo "HTTPS: $status_https"
-
-if echo "$status_https" | grep -qE "^HTTP/.* 5.."; then
-  echo "Warning: HTTPS returning 5xx. If using Cloudflare, ensure SSL mode is 'Full' or 'Full (strict)' and origin serves TLS (set TLS_DIRECTIVE in .env)." >&2
-fi
+status=$(curl -Is "$health_url" | head -n 1 | sed 's/\r$//')
+echo "HTTP:  $status"

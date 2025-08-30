@@ -2,6 +2,8 @@
 
 This plan outlines unit and integration tests for the loan quote service.
 
+Run these tests with `make test` (use `make verify` to include linting).
+
 ## Unit Tests
 
 - **Standard calculation** – verifies amount financed, payment, interest, and total cost for typical values.

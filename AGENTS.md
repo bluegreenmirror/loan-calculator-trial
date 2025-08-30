@@ -19,6 +19,7 @@ This project can be extended or maintained not only by humans but also by AI/aut
    - Never overwrite `.env` in PRs.
    - Use `.env.example` for variable references.
 1. **Testing**:
+   - Run the automated test suite: `make test` (or `make verify` for lint and tests).
    - Manual curl commands for APIs.
    - Browser test for UI.
    - Linting (Python + YAML + Markdown) — see Lint & Formatting.

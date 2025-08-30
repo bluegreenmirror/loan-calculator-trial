@@ -13,8 +13,8 @@ Jump‑start your next ride with a fast, responsive vehicle loan payment calcula
 - 👨‍⚖️ **Lead capture**: name/email/phone validated and persisted (+ affiliate/UTM captured automatically).
 - 🤝 **Affiliate tracking**: records click metadata; passthrough to form.
 - 💐 **API for dealerships**: compute quotes, accept leads.
-- 👨‍⚖️ **Dockerized**: Caddy (TLS), FastAPI, static web.
-- 🤓 **Dev/Prod toggles**: via `.env` + Caddyfile placeholders.
+- 👨‍⚖️ **Dockerized**: Caddy reverse proxy, FastAPI, static web.
+- 🤓 **Configurable**: optional `.env` settings.
 
 ## Quick Start
 
@@ -23,17 +23,18 @@ Jump‑start your next ride with a fast, responsive vehicle loan payment calcula
 git clone https://github.com/bluegreenmirror/loan-calculator-trial
 cd loan-calculator-trial
 
-# Set environment for local dev
+# Optional: customize settings
 cp .env.example .env
-# Edit DOMAIN and EMAIL in .env
 
 # Run the stack
 ./deploy.sh --build
 
-# Open https://$DOMAIN
+# Open http://localhost
 ```
 
-Set `DOMAIN` to your hostname and `EMAIL` to the address used for Let's Encrypt certificates.
+Set `DOMAIN` in `.env` if you want to use a custom host.
+
+Local development runs over plain HTTP; configure your own TLS proxy if needed.
 
 ## API
 
@@ -77,15 +78,12 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
 
 ## Environment variables
 
-All settings live in `.env`:
+The stack runs with defaults. Optional settings in `.env`:
 
-| var             | dev                 | prod                  | note                         |
-| --------------- | ------------------- | --------------------- | ---------------------------- |
-| `DOMAIN`        | `example.com`       | your domain           | Used by deploy script        |
-| `EMAIL`         | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
-| `ADDR`          | `:80`               | `${DOMAIN}`           | Caddy site address           |
-| `TLS_DIRECTIVE` | _(empty)_           | `tls ${EMAIL}`        | Enables HTTPS in prod        |
-| `PERSIST_DIR`   | `/data`             | `/data` or custom dir | Persisted lead/track storage |
+| var           | default     | note                         |
+| ------------- | ----------- | ---------------------------- |
+| `DOMAIN`      | `localhost` | Used by deploy script        |
+| `PERSIST_DIR` | `/data`     | Persisted lead/track storage |
 
 ## CORS configuration
 
@@ -107,7 +105,7 @@ If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by
 
 Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
 
-Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `DOMAIN`, `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
+Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure the `DOMAIN` secret if deploying to a custom host.
 
 For a step‑by‑step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
 
@@ -215,7 +213,7 @@ Notes:
 
 - Caddyfile validation:
 
-  - `make lint-caddy` validates the `Caddyfile` using the official `caddy:2.8` image. It loads environment variables from `.env` if present, otherwise falls back to `.env.example`. This allows CI to validate without requiring secrets. Ensure `ADDR` and `TLS_DIRECTIVE` are present in one of these files when running locally.
+  - `make lint-caddy` validates the `Caddyfile` using the official `caddy:2.8` image.
 
 ## Continuous Integration
 
@@ -231,7 +229,7 @@ Pull requests trigger GitHub Actions to run linters and build all Docker images.
 ├─ web/
 │  ├─ dist/index.html  # responsive calculator (lead form to be added)
 │  └─ Dockerfile
-├─ Caddyfile           # reverse proxy, TLS (auto in prod)
+├─ Caddyfile           # reverse proxy
 ├─ docker-compose.yml  # orchestrates caddy/web/api
 ├─ deploy.sh           # build + deploy script
 ├─ .env.example        # sample configuration
