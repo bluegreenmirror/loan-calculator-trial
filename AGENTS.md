@@ -1,75 +1,184 @@
 # Agents / Automation Guidelines
 
-This project can be extended or maintained not only by humans but also by AI/automation “agents.” This file defines boundaries and conventions.
+This project can be extended or maintained not only by humans but also by AI/automation “agents.”  
+This document is the **operating contract** for collaboration. Follow it exactly.
+
+---
 
 ## Roles
 
-- **Builder Agent**: Implements features in small, atomic commits.
-- **Reviewer Agent**: Ensures PRs follow scope and quality.
-- **Deployment Agent**: Handles Docker builds, pushes, and deploy commands.
+- **Builder Agent**: Implements features/fixes in _small, atomic_ commits; adds/updates tests.
+- **Reviewer Agent**: Ensures PRs follow scope, quality, and documentation requirements.
+- **Deployment Agent**: Builds & deploys (blue/green), creates `.env` from CI secrets, validates health.
+- **Infra Agent**: Proposes & updates Docker/Caddy/Cloudflare/DB/CI; keeps changes backward compatible.
+
+---
 
 ## Rules
 
-1. **Atomicity**: One PR = one logical change (e.g., add API endpoint, add Dockerfile, update docs).
-1. **Branch Naming**: Use `feature/*`, `fix/*`, or `chore/*`.
-1. **Commit Messages**: Conventional Commits style (`feat:`, `fix:`, `chore:`, `docs:`).
-1. **Documentation**: Every feature PR must include docs or README notes.
-1. **Safety**:
-   - Never commit secrets to the repo.
-   - Never overwrite `.env` in PRs.
-   - Use `.env.example` for variable references.
-1. **Testing**:
-   - Manual curl commands for APIs.
-   - Browser test for UI.
-   - Linting (Python + YAML + Markdown) — see Lint & Formatting.
+### 1) Atomicity
 
-## Lint & Formatting
+- One PR = one logical change.  
+  _Examples_: add API endpoint **or** update Caddy config **or** docs refresh.  
+  _Non-examples_: app feature + infra + formatting in one PR.
 
-Agents must follow the repository's configured linters/formatters and keep formatting changes scoped.
+### 2) Branch naming
 
-- Python:
+- `feature/*`, `fix/*`, `chore/*`, `infra/*`, `docs/*`.
 
-  - Formatter: Black (line-length 88, Python 3.12). Config: `pyproject.toml`.
-  - Lint: Ruff (rules: E,F,W,I,UP,B; `E203`/`E501` ignored for Black). Config: `pyproject.toml`.
+### 3) Commit messages
+
+- Use **Conventional Commits**: `feat:`, `fix:`, `chore:`, `infra:`, `docs:`.
+
+### 4) Documentation
+
+- If behavior, endpoints, env vars, or deployment steps change, update `README.md` or `docs/`.  
+- If truly no docs impact, write: **“No docs impact.”**
+
+### 5) Secrets & safety
+
+- Never commit secrets (API keys, DB URLs, Cloudflare tokens).  
+- Never commit a real `.env`; only update `.env.example`.  
+- Use **placeholders** in configs (`{$APEX_HOST}`, `{$WWW_HOST}`, `{$EMAIL}`, `{$HSTS_LINE}`); concrete values live only in `.env` and GitHub Secrets.
+
+### 6) Environment separation (mandatory)
+
+- **Dev**: `localhost`, HTTP only, no HSTS.  
+- **Staging**: staging domain, HTTPS, mirrors prod.  
+- **Prod**: apex + www, Cloudflare **Full (strict)**.  
+- Agents must not collapse these environments or reuse prod secrets in dev.
+
+### 7) Determinism
+
+- Pin dependencies in requirements files.  
+- Upgrades are separate PRs with migration notes (e.g., Pydantic v2: `regex → pattern`).  
+- If a tool fails on prod (e.g., Ruff not installed), move that check to CI or make it optional behind a flag.
+
+### 8) Testing & health checks (required)
+
+- **Every PR** must:
+  - Add/adjust **pytest** unit tests for new/changed models & business logic.
+  - Include **curl** examples for any changed endpoint.  
+  - Pass **smoke tests** in CI: `/api/health`, critical endpoints.
+  - Pass `make lint` (Python/YAML/Markdown/Caddyfile).
+
+---
+
+## Lint & formatting
+
+Keep formatting scoped to touched files unless doing a dedicated fmt PR.
+
+- **Python**
+  - Formatter: Black (line-length 88).
+  - Lint: Ruff (rules: E,F,W,I,UP,B; Black-compatible ignores).
   - Commands:
-    - Format: `make format` (formats Python under `api/`).
-    - Lint: `make lint-python` or all linters via `make lint`.
+    - Format: `make format` (Python under `api/`).
+    - Lint: `make lint-python` or `make lint`.
 
-- YAML:
+- **YAML**: `make lint-yaml`
 
-  - Lint: `yamllint` with repo rules. Config: `.yamllint.yaml`.
-  - Command: `make lint-yaml`.
+- **Markdown**: `make lint-md`
 
-- Markdown:
+- **Caddyfile**: `make lint-caddy` (uses official image)
 
-  - Formatter: `mdformat` with GitHub Flavored Markdown and wrap 88. Config: `pyproject.toml`.
-  - Commands:
-    - Format: `make format` (formats `README.md` and `docs/`).
-    - Lint/check: `make lint-md`.
+- **EditorConfig**: enforce LF, UTF-8, trimming, 2-space indent default (4 for `.py`, tabs for Makefile)
 
-- Caddyfile:
+- **Scope & PR hygiene**
+  - Don’t mix formatting with features.
+  - If formatting touches >2 unrelated files → isolate to `chore: format` PR.
 
-  - Validate syntax using official image. Command: `make lint-caddy`.
+---
 
-- Docker build-time lint (optional local gate):
+## Deployment rules
 
-  - Build `Dockerfile.lint` to run all checks in a clean environment: `make lint-docker`.
+- **Blue/Green only** in prod. Use `deploy.sh blue|green`.  
+  Direct `docker compose up` on the server is **not** allowed.
 
-- EditorConfig:
+- **.env in CI/CD**:
+  - Deployment Agent must **generate `.env` from GitHub Secrets** before running `deploy.sh`.  
+  - Never assume `.env` already exists on the target VM.
 
-  - Respect `.editorconfig` (LF endings, UTF-8, trim trailing whitespace; 2-space indent by default, 4 for `.py`, tabs for `Makefile`). Ensure your editor applies it.
+- **Validation after cutover**:
+  - Run `make validate-prod` (or scripts/validate_*.sh).  
+  - If validation fails, revert edge to the previous color automatically and exit non-zero.
 
-- Scope & PR hygiene:
+- **Cloudflare/TLS**:
+  - Obtain certs with Caddy (DNS only during issuance).  
+  - Switch to Cloudflare proxy after certs exist; SSL mode **Full (strict)**.
 
-  - Do not mix broad formatting rewrites with feature/fix changes. If a formatter touches unrelated files, either:
-    - Limit formatting to files you edited, or
-    - Open a separate `chore: format` PR containing only formatting changes.
-  - All PRs must pass `make lint` before review.
+---
 
-## Communication
+## Communication & PR template
 
-- Use Pull Requests for all changes.
-- Each PR must include:
-  - Summary of changes.
-  - Testing instructions.
-  - Any new env vars or config changes.
+Each PR must include:
+
+1. **Summary** of changes (what/why).  
+2. **Testing instructions** (pytest + curl examples).  
+3. **New env vars** (and update to `.env.example`).  
+4. **Docs impact** (what was updated or “No docs impact”).  
+5. **Validation** (how it will be verified after deploy).
+
+---
+
+## Planning & workstreams (deterministic delivery)
+
+Break work into explicit milestones with acceptance criteria:
+
+1) **Core app**  
+   - `/api/health` returns 200.  
+   - Front-end served by Caddy (dev: HTTP).
+
+2) **Local dev baseline**  
+   - `docker-compose.override.dev.yml` (localhost, no TLS).  
+   - `curl http://localhost/api/health` returns 200.
+
+3) **Production baseline**  
+   - Caddyfile uses **placeholders**; CI verifies config loads (`caddy adapt`).  
+   - Smoke test `curl -I -H "Host:$APEX_HOST" http://127.0.0.1`.
+
+4) **Persistence**  
+   - Phase 1: JSON file with Docker volume `/data` (MVP).  
+   - Phase 2: migrate to **Postgres** (schema, migrations, integration tests).
+
+5) **Infra**  
+   - Decide early: Caddy ACME vs Cloudflare origin certs.  
+   - Acceptance: apex + www both serve valid TLS; redirect strategy documented.
+
+6) **CI/CD**  
+   - Stage 1: lint + pytest.  
+   - Stage 2: docker build + compose up in runner.  
+   - Stage 3: deploy to **staging**; run smoke tests.  
+   - Stage 4: promote to **prod** (blue/green).
+
+---
+
+## Quick-reference checklists
+
+### Feature PR
+
+- [ ] Branch name `feature/*`  
+- [ ] Tests added (pytest)  
+- [ ] curl examples in PR description  
+- [ ] Lint passes (`make lint`)  
+- [ ] Docs updated or “No docs impact”  
+- [ ] `.env.example` updated if needed
+
+### Infra PR
+
+- [ ] Caddy/Docker changes isolated (no app code mixed)  
+- [ ] `caddy adapt` passes (CI)  
+- [ ] Blue/green plan included, with rollback steps  
+- [ ] Validation script updated if needed
+
+### Deploy
+
+- [ ] `.env` generated from secrets in CI  
+- [ ] Staging deployed and validated  
+- [ ] Prod blue/green cutover completed  
+- [ ] Post-cutover validation passed; rollback if not
+
+---
+
+## Collaboration Contract
+
+This file is the collaboration contract. If a change would violate these rules, open a discussion first and adjust the plan rather than “forcing it to work.”
