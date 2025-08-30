@@ -58,6 +58,9 @@ ctype=$(curl -sI "http://$DOMAIN/" | awk -v IGNORECASE=1 '/^Content-Type:/ {prin
 echo "$ctype" | grep -qi 'text/html' || echo "(warn) Content-Type not HTML on HTTP root: $ctype"
 
 echo "[validate-local] Checking API health via edge..."
-curl -fsS "http://$DOMAIN/api/health" | grep -q '"ok": true'
+resp=$(curl -fsS "http://$DOMAIN/api/health" || true)
+echo "$resp" | grep -Eq '"ok"\s*:\s*true' || {
+  echo "API health unexpected response: $resp" >&2; exit 1;
+}
 
 echo "[validate-local] OK: site reachable and API healthy"

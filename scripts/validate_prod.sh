@@ -22,6 +22,6 @@ echo "[validate-prod] Apex/WWW/TLS checks for $APEX_HOST / $WWW_HOST"
 bash scripts/validate_caddy_prod.sh
 
 echo "[validate-prod] API health over HTTPS"
-curl -fsS "https://$APEX_HOST/api/health" | grep -q '"ok": true'
+resp=$(curl -fsS "https://$APEX_HOST/api/health" || true)
+echo "$resp" | grep -Eq '"ok"\s*:\s*true' || { echo "Unexpected API health response: $resp" >&2; exit 1; }
 echo "[validate-prod] OK: production site reachable and API healthy"
-
