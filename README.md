@@ -1,6 +1,6 @@
 # Vehicle Loan Calculator
 
-Jump‑start your next ride with a fast, responsive vehicle loan payment calculator for autos, RVs, motorcycles, and jet skis — complete with lead‑gen and affiliate tracking. Fully containerized, tuned for growth, and ready to deploy. Calculate, compare, and cruise toward your dream vehicle today!
+Jump-start your next ride with a fast, responsive vehicle loan payment calculator for autos, RVs, motorcycles, and jet skis — complete with lead-gen and affiliate tracking. Fully containerized, tuned for growth, and ready to deploy. Calculate, compare, and cruise toward your dream vehicle today!
 
 > **Note:** This project is for demo purposes only as of Aug 25, 2025 and may not result in offers or responses.
 
@@ -21,19 +21,17 @@ Jump‑start your next ride with a fast, responsive vehicle loan payment calcula
 ```bash
 # Clone the repo
 git clone https://github.com/bluegreenmirror/loan-calculator-trial
-cd loan-calculator-trial
+cd loan-calculator-calculator
 
 # Set environment for local dev
 cp .env.example .env
 # Edit DOMAIN and EMAIL in .env
 
-# Run the stack
-./deploy.sh --build
+# Run the stack for local development
+make verify
 
-# Open https://$DOMAIN
+# Open http://localhost
 ```
-
-Set `DOMAIN` to your hostname and `EMAIL` to the address used for Let's Encrypt certificates.
 
 ## API
 
@@ -68,77 +66,27 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
     -d '{"affiliate":"partnerX"}'
   ```
 
-## Front‑end
+## Deployment
 
-- Modular static assets in `web/dist` (`index.html`, `style.css`, `app.js`)
-- Footer links to legal pages (`privacy.html`, `terms.html`)
-- The lead form (to be added) will auto-capture `affiliate`/UTM parameters from the page URL and submit them with the lead payload.
-- Vehicle type dropdown (Auto, RV, Motorcycle, Jet Ski) updates APR and term presets.
+This project supports blue‑green deployment to minimize downtime. See [Release Process](RELEASE_PROCESS.md) for full details. Quick reference:
 
-## Environment variables
+- Production prerequisites:
 
-All settings live in `.env`:
+  - `.env` has: `DOMAIN`, `APEX_HOST`, `WWW_HOST`, `EMAIL`, and `TLS_DIRECTIVE=tls ${EMAIL}`.
+  - One‑time infra: `docker network create edge-net` and `docker volume create edge_caddy_data`.
+  - Cloudflare (if used): SSL/TLS mode “Full” or “Full (strict)”, apex/www DNS → server IP.
 
-| var             | dev                 | prod                  | note                         |
-| --------------- | ------------------- | --------------------- | ---------------------------- |
-| `DOMAIN`        | `example.com`       | your domain           | Used by deploy script        |
-| `EMAIL`         | `admin@example.com` | admin@yourdomain      | Let's Encrypt contact        |
-| `ADDR`          | `:80`               | `${DOMAIN}`           | Caddy site address           |
-| `TLS_DIRECTIVE` | _(empty)_           | `tls ${EMAIL}`        | Enables HTTPS in prod        |
-| `PERSIST_DIR`   | `/data`             | `/data` or custom dir | Persisted lead/track storage |
+- Deploy and validate:
 
-## CORS configuration
+  - Deploy blue: `./deploy.sh blue`
+  - Validate prod: `make validate-prod`
+  - Switch to green: `./deploy.sh green`
 
-The API exposes configuration for cross‑origin requests via the `ALLOWED_ORIGINS` environment variable. Set this to a comma‑separated list of origins that are permitted to access the API (for example,
+- Local validation:
 
-`ALLOWED_ORIGINS="https://example.com,http://localhost:8080"`).
-
-If `ALLOWED_ORIGINS` is not provided, cross‑origin requests will be blocked by default to reduce the risk of malicious sites interacting with the service.
-
-## Build Modes
-
-- `make build-dev`: Runs local linters/tests, then builds all services (including the `lint` image). Intended for developer machines.
-- `make build-release`: Builds only runtime images (`api`, `web`) — no dev tooling. Intended for servers/CI deploy artifacts.
-- Scripts:
-  - `scripts/build-dev.sh`: Wrapper for `make build-dev`.
-  - `scripts/build-release.sh`: Wrapper for `make build-release`.
-
-## Deploying
-
-Any Docker‑friendly host (Render, Railway, Fly.io, ECS, etc.) will work.
-
-Merges to `main` trigger a GitHub Actions workflow that writes a `.env` from repository secrets, runs `scripts/check-env.sh` to validate required keys, executes `./deploy.sh --build --pull`, and then calls `scripts/health-check.sh` to curl the root site and `/api/health`. Configure secrets `DOMAIN`, `EMAIL`, `APEX_HOST`, and `WWW_HOST` beforehand.
-
-For a step‑by‑step server guide (Ubuntu/Debian), see `docs/SERVER_SETUP.md`.
-
-Server setup (Ubuntu/Debian):
-
-```bash
-# One‑time: copy env and set values
-cp .env.example .env
-sed -i 's/example.com/your-domain.tld/' .env
-sed -i 's/admin@example.com/you@your-domain.tld/' .env
-
-# Optional: bootstrap server prerequisites (Docker, Compose, make, Python venv)
-./deploy.sh --bootstrap
-
-# Build and deploy (skips linters/tests by default on servers)
-./deploy.sh --build --pull
-
-# To include linters/tests on the server, add --verify
-./deploy.sh --build --pull --verify
-```
-
-Notes:
-
-- `--verify` runs `make verify` which uses a Python virtualenv and dev tools. The script will create `.venv` and install from `requirements-dev.txt` when `--verify` is provided.
-- If Docker requires sudo on first run, the script falls back to `sudo docker`. After bootstrapping, log out and log back in (or run `newgrp docker`).
-
-Manual health check after deploy:
-
-```bash
-curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
-```
+  - `make validate-local` brings up a color stack, points edge to it, and verifies:
+    - `http://localhost` returns HTML
+    - `http://localhost/api/health` returns `{ "ok": true }`
 
 ## Testing
 
@@ -148,8 +96,6 @@ Run linting and the test suite locally before building.
 pip install -r requirements-dev.txt
 make verify  # or `make test` to run tests only
 ```
-
-`deploy.sh --build` automatically runs `make verify`.
 
 ### External checks
 
@@ -164,23 +110,6 @@ CADDY_HEALTH_URL=http://localhost:8080 pytest --run-external
 
 # Run only fast, hermetic tests (default behavior)
 pytest -k 'not external'
-
-## Releases & Rollback
-
-- Tag a release:
-  - `make release-tag VERSION=v0.1.0 VERIFY=1 PUSH=1`
-    - Creates an annotated git tag (runs linters/tests if `VERIFY=1`) and pushes it if `PUSH=1`.
-
-- Deploy a specific version (on server):
-  - `git checkout v0.1.0 && ./deploy.sh -b --verify`
-
-- Roll back to a previous version (scripted):
-  - `make rollback REF=v0.1.0 BUILD=1 VERIFY=1 YES=1`
-    - Checks out the ref and redeploys via `deploy.sh`.
-
-Notes:
-- Ensure `.env` is present on the server with your production values before deploying.
-- If you prefer image-based releases, configure your container registry and extend the scripts to build/push images per tag.
 ```
 
 ## Linting & Formatting
@@ -208,7 +137,7 @@ Notes:
 
   ```bash
   # Runs all linters at image build; fails on issues
-  docker compose build lint
+  docker compose --profile dev build lint
   # or
   make lint-docker
   ```

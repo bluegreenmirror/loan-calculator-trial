@@ -1,149 +1,81 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 usage() {
   cat <<EOF
-Usage: $0 [--build|-b] [--pull] [--prune] [--verify] [--bootstrap]
+Usage: $0 <blue|green>
 
-Options:
-  -b, --build     Build Docker images before deploying
-      --pull      Pull latest base images before building
-      --prune     Prune dangling Docker images after deploy
-      --verify    Run linters/tests via Makefile (requires Python venv/dev tools)
-      --bootstrap Install server prerequisites (Docker, Compose, make, Python venv)
+Deploys the application to the specified environment using a blue-green strategy.
 EOF
 }
 
-BUILD=0; PULL=0; PRUNE=0; VERIFY=0; BOOTSTRAP=0
-for arg in "$@"; do
-  case "$arg" in
-    -b|--build) BUILD=1 ;; 
-    --pull)     PULL=1 ;; 
-    --prune)    PRUNE=1 ;; 
-    --verify)   VERIFY=1 ;; 
-    --bootstrap) BOOTSTRAP=1 ;; 
-    -h|--help)  usage; exit 0 ;; 
-  esac
-done
-
-if [ ! -f ".env" ]; then
-  echo "Missing .env. Create it with DOMAIN and EMAIL."; exit 1
-fi
-
-if [ $BOOTSTRAP -eq 1 ]; then
-  echo "Bootstrapping server prerequisites..."
-  if command -v apt-get >/dev/null 2>&1; then
-    sudo apt-get update -y
-    sudo apt-get install -y docker.io docker-compose-plugin make python3-venv python3-pip
-    # Ensure docker group exists and add current user
-    if ! getent group docker >/dev/null 2>&1; then
-      sudo groupadd docker || true
-    fi
-    sudo usermod -aG docker "$USER" || true
-    echo "Bootstrap complete. If this is your first time installing Docker, log out and back in (or run: newgrp docker) before continuing."
-  else
-    echo "Unsupported package manager. Please install Docker, docker-compose-plugin, make, and Python (venv) manually."
-  fi
-fi
-
-# Choose docker command (fallback to sudo if needed)
-DOCKER_CMD="docker"
-if ! $DOCKER_CMD ps >/dev/null 2>&1; then
-  if command -v sudo >/dev/null 2>&1;
-    then
-    DOCKER_CMD="sudo docker"
-  fi
-fi
-
-if [ $PULL -eq 1 ]; then
-  # Pull only runtime images; lint is dev-only (profiled) and built locally if needed
-  $DOCKER_CMD compose pull caddy || true
-fi
-
-ensure_venv_and_deps() {
-  echo "Ensuring virtual environment and dependencies..."
-  if [ ! -d ".venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv .venv
-    if [ ! -d ".venv" ]; then
-      echo "Failed to create virtual environment."; exit 1
-    fi
-  fi
-  . .venv/bin/activate
-  pip install --upgrade pip
-  if [ -f requirements-dev.txt ]; then
-    echo "Installing dependencies from requirements-dev.txt..."
-    pip install -r requirements-dev.txt
-  fi
-  if ! command -v ruff >/dev/null 2>&1; then
-    echo "ruff not found in virtual environment."; exit 1
-  fi
-  echo "Virtual environment and dependencies are up to date."
-}
-
-if [ $BUILD -eq 1 ]; then
-  if [ $VERIFY -eq 1 ]; then
-    if ! command -v make >/dev/null 2>&1; then
-      echo "make is required for --verify. Install it or re-run without --verify."; exit 1
-    fi
-    ensure_venv_and_deps
-    make verify
-  else
-    echo "Skipping verification (linters/tests). Use --verify to enable."
-  fi
-  # Build only runtime services for a lightweight production image set
-  $DOCKER_CMD compose build --pull api web
-fi
-
-# Start or update containers
-if ! DockerComposeUpOutput=$($DOCKER_CMD compose up -d 2>&1); then
-  echo "$DockerComposeUpOutput"
+if [ $# -ne 1 ]; then
+  usage
   exit 1
 fi
 
-domain=$(grep ^DOMAIN .env | cut -d= -f2)
-tls_directive=$(grep ^TLS_DIRECTIVE .env | cut -d= -f2- || true)
+ENV=$1
+if [ "$ENV" != "blue" ] && [ "$ENV" != "green" ]; then
+  usage
+  exit 1
+fi
 
-# Prefer HTTPS health check when TLS is enabled
-if [ -n "${tls_directive}" ]; then
-  health_url="https://$domain"
+# Create external network and volume if they don't exist
+docker network create edge-net || true
+docker volume create edge_caddy_data || true
+
+# Set environment variables based on the chosen environment
+if [ "$ENV" == "blue" ]; then
+  export PROJECT_NAME="loancalc-blue"
+  OLD_PROJECT_NAME="loancalc-green"
 else
-  health_url="http://$domain"
+  export PROJECT_NAME="loancalc-green"
+  OLD_PROJECT_NAME="loancalc-blue"
 fi
 
-echo "Waiting for Caddy at ${health_url} ..."
-for i in {1..30}; do
-  if curl -k -L -sSf -o /dev/null "$health_url"; then
-    echo "Caddy is up."
-    break
-  fi
-  sleep 1
-done
+echo "Deploying to $ENV environment..."
+docker compose -p $PROJECT_NAME up -d --build caddy api web
 
-# Optionally run linters/tests after services are up
-if [ $VERIFY -eq 1 ]; then
-  if ! command -v make >/dev/null 2>&1; then
-    echo "make is required for --verify. Install it or re-run without --verify."; exit 1
-  fi
-  ensure_venv_and_deps
-  make verify
-else
-  echo "Skipping verification (linters/tests). Use --verify to enable."
+echo "Waiting for $ENV environment to be healthy..."
+sleep 15
+
+# Health check on the internal service
+if ! docker run --rm --network=${PROJECT_NAME}_default curlimages/curl:latest -sSf http://api:8000/api/health > /dev/null; then
+  echo "Health check failed for $ENV environment."
+  exit 1
 fi
 
-if [ $PRUNE -eq 1 ]; then
-  $DOCKER_CMD image prune -f
+echo "$ENV environment is healthy."
+
+# Switch traffic by creating a new Caddyfile for the edge
+echo "Switching traffic to $ENV environment."
+sed "s|##LIVE_UPSTREAM##|${PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.caddyfile > Caddyfile.edge
+
+# Reload the main Caddy instance
+echo "Reloading edge Caddy instance..."
+docker compose up -d edge
+EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
+docker kill -s SIGHUP $EDGE_CONTAINER_ID
+sleep 5
+
+# Health check on the live domain
+echo "Verifying live domain..."
+LIVE_URL="https://$DOMAIN"
+if ! curl -ksSf "$LIVE_URL" > /dev/null; then
+  echo "Health check failed for live domain."
+  echo "Rolling back to $OLD_PROJECT_NAME..."
+  sed "s|##LIVE_UPSTREAM##|${OLD_PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.caddyfile > Caddyfile.edge
+  EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
+docker kill -s SIGHUP $EDGE_CONTAINER_ID
+sleep 5
+  exit 1
 fi
 
-echo "Deployed. Checking health..."
-sleep 2
+echo "Live domain is healthy."
 
-# Report both HTTP and HTTPS statuses for clarity
-status_http=$(curl -Is http://$domain | head -n 1 | sed 's/\r$//')
-status_https=$(curl -k -Is https://$domain | head -n 1 | sed 's/\r$//')
-echo "HTTP:  $status_http"
-echo "HTTPS: $status_https"
+# Stop the old environment to save resources
+echo "Stopping old environment ($OLD_PROJECT_NAME)..."
+docker compose -p $OLD_PROJECT_NAME down --remove-orphans || true
 
-if echo "$status_https" | grep -qE "^HTTP/.* 5.."; then
-  echo "Warning: HTTPS returning 5xx. If using Cloudflare, ensure SSL mode is 'Full' or 'Full (strict)' and origin serves TLS (set TLS_DIRECTIVE in .env)." >&2
-fi
+echo "Deployment to $ENV environment successful."
+echo "Live environment is now: $ENV"

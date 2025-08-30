@@ -39,15 +39,17 @@ else
 fi
 
 # 3) WWW HTTPS serves HTML with 200
+# Use GET (not HEAD) so CDNs that omit some headers on HEAD don't cause false negatives
 code=$(curl -s -o /dev/null -w '%{http_code}' "https://$WWW_HOST/") || true
 [[ "$code" == "200" ]] || fail "HTTPS GET expected 200, got $code"
-ctype=$(curl -s -I "https://$WWW_HOST/" | awk -v IGNORECASE=1 '/^Content-Type:/ {print tolower($2)}' | tr -d '\r')
-echo "$ctype" | grep -qi 'text/html' || fail "Content-Type should include text/html, got '$ctype'"
+ctype=$(curl -s -o /dev/null -w '%{content_type}' "https://$WWW_HOST/")
+echo "$ctype" | tr '[:upper:]' '[:lower:]' | grep -qi 'text/html' || fail "Content-Type should include text/html, got '$ctype'"
 pass "WWW HTTPS returns 200 and HTML"
 
 # 4) Optional HSTS header when configured
 if [[ -n "${HSTS_LINE}" ]]; then
-  hsts=$(curl -s -I "https://$WWW_HOST/" | awk -v IGNORECASE=1 '/^Strict-Transport-Security:/ {print $0}')
+  # Use GET headers to avoid CDN differences on HEAD
+  hsts=$(curl -s -D - "https://$WWW_HOST/" -o /dev/null | awk -v IGNORECASE=1 '/^Strict-Transport-Security:/ {print $0}')
   [[ -n "$hsts" ]] || fail "HSTS expected, but not present"
   pass "HSTS header present: $hsts"
 else

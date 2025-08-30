@@ -1,12 +1,7 @@
 services:
-  lint:
-    build:
-      context: .
-      dockerfile: Dockerfile.lint
-    profiles: ["dev"]
-    # Building this service runs all linters at build-time
-  caddy:
+  edge:
     image: caddy:2.8
+    container_name: loancalc-edge
     restart: unless-stopped
     ports:
       - "80:80"
@@ -15,37 +10,55 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - EMAIL=${EMAIL}
-      - ADDR=${ADDR}
+      - APEX_HOST=${APEX_HOST}
+      - WWW_HOST=${WWW_HOST}
       - TLS_DIRECTIVE=${TLS_DIRECTIVE}
     volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./web/dist:/srv:ro
+      - ./Caddyfile.edge:/etc/caddy/Caddyfile
+      - edge_caddy_data:/data
+    networks:
+      - edge-net
+
+  caddy:
+    image: caddy:2.8
+    container_name: ${PROJECT_NAME}-caddy
+    restart: unless-stopped
+    networks:
+      - edge-net
+      - default
+    environment:
+      - API_UPSTREAM=api:8000
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./web/dist:/srv
     depends_on:
       - api
-    networks:
-      - loancalc
 
   api:
     build: ./api
     restart: unless-stopped
-    volumes:
-      - data:/data
     networks:
-      - loancalc
+      - default
 
   web:
     build: ./web
     restart: unless-stopped
     command: tail -f /dev/null
     networks:
-      - loancalc
+      - default
+
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.lint
+    image: loancalc/lint:latest
+    profiles: ["dev"]
 
 volumes:
-  caddy_data:
-  caddy_config:
-  data:
+  edge_caddy_data:
+    external: true
 
 networks:
-  loancalc:
+  edge-net:
+    external: true
+  default:

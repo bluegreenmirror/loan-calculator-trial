@@ -1,0 +1,20 @@
+# To use a DNS provider for ACME challenges, you will need to build a custom
+# Caddy image with the appropriate plugin.
+# For example, to use Cloudflare:
+#
+# {
+#     acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+# }
+
+{$APEX_HOST} {
+	reverse_proxy ##LIVE_UPSTREAM##
+}
+
+{$WWW_HOST} {
+	redir https://{$APEX_HOST}{uri}
+}
+
+# Local development convenience: serve http://localhost to the live upstream
+localhost {
+	reverse_proxy ##LIVE_UPSTREAM##
+}

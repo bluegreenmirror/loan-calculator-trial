@@ -1,7 +1,7 @@
-{$ADDR} {
-	reverse_proxy /api/* api:8000
-	root * /srv
-	try_files {path} {path}/index.html
-	file_server 
-	{$TLS_DIRECTIVE}
+:80 {
+	reverse_proxy /api/* {$API_UPSTREAM}
+	file_server {
+		root /srv
+		index index.html
+	}
 }
