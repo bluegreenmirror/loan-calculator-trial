@@ -8,24 +8,22 @@ The deployment process uses a blue-green strategy to minimize downtime. This mea
 
 This allows us to deploy a new version of the application to the inactive environment, run health checks, and then switch traffic to it with zero downtime.
 
-This process is designed to work on a single instance, like an e2-micro, by using port-based routing and a front-facing reverse proxy.
+This process is designed to work on a single instance, like an e2-micro, by using a front-facing reverse proxy.
 
 ## Local Development
 
-The blue-green deployment setup is designed for production and staging environments. For local development, a simpler setup is used to make it easier to run and test the application.
-
-The local development environment is defined in the `docker-compose.local.yml` file. This file is a simplified version of the main `docker-compose.yml` and does not include the blue-green deployment complexity.
+For local development, you can use the `dev` profile in the `docker-compose.yml` file. This will start the application and the linting service.
 
 To run the application locally, you can use the following `make` commands:
 
-*   `make verify`: This will run all linters and tests. It will automatically bring up the necessary services using `docker-compose.local.yml`, run the tests, and then shut them down.
+*   `make verify`: This will run all linters and tests. It will automatically bring up the necessary services using the `dev` profile, run the tests, and then shut them down.
 *   `make test`: This will run the unit and integration tests.
 *   `make lint`: This will run all the linters.
 
 If you want to run the application locally for manual testing, you can use the following command:
 
 ```bash
-docker compose -f docker-compose.local.yml up
+docker compose --profile dev up
 ```
 
 This will start the application, and you can access it at `http://localhost`.
@@ -42,50 +40,40 @@ Before you can deploy, you need the following:
 To run the main Caddy instance, you can use the following command:
 
 ```bash
-docker run -d --name main-caddy -p 80:80 -p 443:443 \
-  -v $(pwd)/Caddyfile.main:/etc/caddy/Caddyfile \
-  -v $(pwd)/live.caddy:/etc/caddy/live.caddy \
-  -v caddy_data:/data \
-  caddy:2.8
+docker compose up -d edge
 ```
 
-This will start a Caddy container named `main-caddy` that uses the `Caddyfile.main` configuration and imports the `live.caddy` file, which determines the active environment.
+This will start a Caddy container named `loancalc-edge` that uses the `Caddyfile.edge` configuration.
 
 ## Deployment Steps
 
 To deploy a new version of the application, follow these steps:
 
-1.  **Choose an environment to deploy to.** If the current live environment is "blue", you will deploy to "green", and vice-versa. You can see the current live environment in the `live.caddy` file.
+1.  **Choose an environment to deploy to.** If the current live environment is "blue", you will deploy to "green", and vice-versa.
 
-2.  **Run the deployment script.** Use the `deploy.sh` script with the `--env` flag to specify the environment to deploy to.
+2.  **Run the deployment script.** Use the `deploy.sh` script with the environment name as an argument.
 
     ```bash
     # To deploy to the blue environment
-    ./deploy.sh --env blue
+    ./deploy.sh blue
 
     # To deploy to the green environment
-    ./deploy.sh --env green
+    ./deploy.sh green
     ```
 
 3.  **The script will then:**
     *   Build the Docker images.
-    *   Start the new environment on a different port.
+    *   Start the new environment.
     *   Run health checks against the new environment.
-    *   If the health checks pass, it will update the `live.caddy` file to point to the new environment.
+    *   If the health checks pass, it will generate a new `Caddyfile.edge` file with the correct upstream and reload the edge Caddy.
     *   Stop the old environment to save resources.
-
-4.  **Reload the main Caddy instance.** After the script finishes, you need to reload the main Caddy instance to make the changes take effect.
-
-    ```bash
-    docker exec main-caddy caddy reload --config /etc/caddy/Caddyfile
-    ```
 
 ## Rollback
 
 If you need to roll back to the previous version, you can simply deploy the old environment again. For example, if you just deployed the "green" environment and something went wrong, you can roll back to "blue" by running:
 
 ```bash
-./deploy.sh --env blue
+./deploy.sh blue
 ```
 
 This will start the "blue" environment (if it was stopped), run health checks, and then switch the traffic back to it.

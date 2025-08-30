@@ -1,7 +1,0 @@
-{
-    auto_https off
-}
-
-localhost {
-    import /etc/caddy/live.caddy
-}

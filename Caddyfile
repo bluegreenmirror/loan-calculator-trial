@@ -1,4 +1,4 @@
-{$DOMAIN} {
+:80 {
 	reverse_proxy /api/* {$API_UPSTREAM}
 	file_server {
 		root /srv
