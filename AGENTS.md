@@ -86,6 +86,7 @@ Keep formatting scoped to touched files unless doing a dedicated fmt PR.
 - **Scope & PR hygiene**
   - Don’t mix formatting with features.
   - If formatting touches >2 unrelated files → isolate to `chore: format` PR.
+  - Before opening a PR, always run `make lint` and `make format` locally.
 
 ---
 

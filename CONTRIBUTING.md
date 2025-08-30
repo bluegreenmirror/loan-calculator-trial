@@ -13,8 +13,10 @@ We welcome contributions from developers, product thinkers, and automation agent
    ```bash
    cp .env.example .env
    ```
-1. Install development tools and set up git hooks:
+1. Set up Python venv and development tools (one-time):
    ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
    pip install -r requirements-dev.txt
    pre-commit install
    ```
@@ -48,7 +50,14 @@ We follow Conventional Commits:
 - Python: PEP8 + type hints.
 - HTML/JS: Prettier defaults, semantic HTML.
 - YAML: 2-space indentation
-- Run `pre-commit run --all-files` or `make lint` before committing.
+- Always run `make lint` before committing and fix any issues.
+- Run `make format` to apply formatters to touched files.
+- You can also use `pre-commit run --all-files` locally.
+
+## Required checks (humans and agents)
+
+- `make lint` must pass (Python, YAML, Markdown, Caddyfile).
+- For API changes: add/adjust tests and include curl examples in the PR.
 
 ## Environment
 

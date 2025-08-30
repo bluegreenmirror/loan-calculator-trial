@@ -11,6 +11,9 @@ DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 COMPOSE_DEV := docker compose --profile dev
 
 .PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release prod-validate release-tag rollback validate-local validate-prod
+setup-dev: ## Create venv and install dev deps
+	python3 -m venv .venv
+	.venv/bin/pip install -r requirements-dev.txt
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
 

@@ -26,11 +26,15 @@ cd loan-calculator-internal
 # Local dev (HTTP on localhost)
 cp .env.example .env   # no secrets; keep TLS vars empty for dev
 
+# One-time Python toolchain (venv) for lint/tests
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+
 # Bring up local stack and validate via edge proxy
 make validate-local     # uses Docker; serves http://localhost
 
 # Alternative: lint + tests only (no running stack)
-pip install -r requirements-dev.txt
 make verify
 ```
 
@@ -151,11 +155,13 @@ pytest -k 'not external'
 
 - Tools: `ruff` (Python), `black` (Python), `mypy` with the `pydantic.mypy` plugin, `yamllint` (YAML), `mdformat` (Markdown).
 
-- Local usage:
+- Local usage (requires venv):
 
   ```bash
-  # Install tools (one-time)
-  pip install -r requirements-dev.txt || pip install ruff black mypy yamllint mdformat mdformat-gfm pre-commit
+  # One-time setup (in repo root)
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements-dev.txt
 
   # Install git hooks
   pre-commit install
@@ -167,6 +173,10 @@ pytest -k 'not external'
   # Auto-format Python and Markdown
   make format
   ```
+
+- Notes:
+
+  - The Makefile runs tools from `.venv/bin/...`. Ensure you installed into `.venv` as above. If you open a new shell, re-activate with `source .venv/bin/activate`.
 
 - Build-time check via Docker:
 
@@ -216,3 +226,9 @@ Pull requests trigger GitHub Actions to run linters and build all Docker images.
 ## Contributing
 
 See `CONTRIBUTING.md` for commit conventions and setup. See `AGENTS.md` if you’re using automation to generate PRs.
+
+Before you push (humans and agents):
+
+- Always run `make lint` and fix issues.
+- Run `make format` to apply formatters (Python/Markdown/Caddyfile) to touched files.
+- Keep PRs atomic; include tests and curl examples for API changes.
