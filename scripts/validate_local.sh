@@ -26,14 +26,7 @@ sleep 3
 # Use a curl container on the project network to check the API by service name
 docker run --rm --network=${PROJECT_NAME}_default curlimages/curl:latest -sSf http://api:8000/api/health >/dev/null
 
-echo "[validate-local] Pointing edge to ${PROJECT_NAME}-caddy:80"
-# For local validation, use a localhost-only edge config to avoid missing domain env vars
-cat > Caddyfile.edge <<EOF
-http://localhost {
-    reverse_proxy ${PROJECT_NAME}-caddy:80
-}
-EOF
-
+echo "[validate-local] Pointing edge to ${PROJECT_NAME}-caddy:80 (without modifying repo files)"
 echo "[validate-local] Starting/reloading edge..."
 # Try to start existing named container; if missing, create via compose
 docker start loancalc-edge >/dev/null 2>&1 || docker compose -p edge up -d edge
@@ -44,8 +37,16 @@ for i in {1..30}; do
   if [ "$state" = "true" ]; then break; fi
   sleep 1
 done
-# Reload config
-docker exec loancalc-edge caddy reload --config /etc/caddy/Caddyfile
+# Prepare a temporary Caddyfile inside the container and reload using it
+EDGE_TMP=$(mktemp)
+cat > "$EDGE_TMP" <<EOF
+http://localhost {
+    reverse_proxy ${PROJECT_NAME}-caddy:80
+}
+EOF
+docker cp "$EDGE_TMP" loancalc-edge:/tmp/edge.caddy >/dev/null
+rm -f "$EDGE_TMP"
+docker exec loancalc-edge caddy reload --adapter caddyfile --config /tmp/edge.caddy
 
 # Give edge a moment to accept connections after reload
 sleep 1
