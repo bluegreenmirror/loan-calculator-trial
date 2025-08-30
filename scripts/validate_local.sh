@@ -46,7 +46,7 @@ http://localhost {
 EOF
 docker cp "$EDGE_TMP" loancalc-edge:/tmp/edge.caddy >/dev/null
 rm -f "$EDGE_TMP"
-docker exec loancalc-edge caddy reload --config /tmp/edge.caddy
+docker exec loancalc-edge caddy reload --adapter caddyfile --config /tmp/edge.caddy
 
 # Give edge a moment to accept connections after reload
 sleep 1
