@@ -84,20 +84,22 @@ jobs:
       - name: Start API (background)
         run: |
           . .venv/bin/activate
-          uvicorn api.app:app --host 127.0.0.1 --port 8000 & echo $! > uvicorn.pid
-          sleep 1
+          uvicorn api.app:app --host 127.0.0.1 --port 8000 > uvicorn.log 2>&1 & echo $! > uvicorn.pid
+          sleep 2
       - name: Curl /api/health
         run: |
-          for i in {1..20}; do
+          for i in {1..10}; do
             resp=$(curl -fsS http://127.0.0.1:8000/api/health || true)
             echo "$resp"
             echo "$resp" | grep -Eq '"ok"\s*:\s*true' && break
             sleep 0.5
-            if [ "$i" -eq 20 ]; then
-              echo "API health check failed" >&2
-              exit 1
-            fi
           done
+          if ! echo "$resp" | grep -Eq '"ok"\s*:\s*true'; then
+            echo "API health check failed" >&2
+            echo "--- uvicorn.log (tail) ---"
+            tail -n 200 uvicorn.log || true
+            exit 1
+          fi
       - name: Stop API
         if: always()
         run: |

@@ -40,6 +40,7 @@ docker start loancalc-edge >/dev/null 2>&1 || docker compose -p edge up -d edge
 # Wait for edge to be running
 for i in {1..30}; do
   state=$(docker inspect -f '{{.State.Running}}' loancalc-edge 2>/dev/null || echo false)
+  echo "[validate-local] edge running=$state (attempt $i)"
   if [ "$state" = "true" ]; then break; fi
   sleep 1
 done
@@ -50,6 +51,8 @@ docker exec loancalc-edge caddy reload --config /etc/caddy/Caddyfile
 sleep 1
 
 echo "[validate-local] Checking site (HTTP) at http://$DOMAIN ..."
+echo "[validate-local] Stack status:"
+docker compose -p "$PROJECT_NAME" ps || true
 root_code=$(curl -s -o /dev/null -w '%{http_code}' "http://$DOMAIN/")
 [[ "$root_code" == "200" || "$root_code" == "301" || "$root_code" == "308" ]] || {
   echo "Root returned unexpected code: $root_code" >&2; exit 1; }
@@ -60,7 +63,12 @@ echo "$ctype" | grep -qi 'text/html' || echo "(warn) Content-Type not HTML on HT
 echo "[validate-local] Checking API health via edge..."
 resp=$(curl -fsS "http://$DOMAIN/api/health" || true)
 echo "$resp" | grep -Eq '"ok"\s*:\s*true' || {
-  echo "API health unexpected response: $resp" >&2; exit 1;
+  echo "API health unexpected response: $resp" >&2;
+  echo "[validate-local] Recent logs (caddy, api):";
+  docker compose -p "$PROJECT_NAME" logs --tail 100 caddy api || true;
+  echo "[validate-local] Edge logs:";
+  docker logs --tail 100 loancalc-edge || true;
+  exit 1;
 }
 
 echo "[validate-local] OK: site reachable and API healthy"
