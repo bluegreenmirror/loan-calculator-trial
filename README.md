@@ -66,6 +66,20 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
     -d '{"affiliate":"partnerX"}'
   ```
 
+- Affiliate tracking with UTMs (POST JSON):
+
+  ```bash
+  curl -s http://localhost/api/track -X POST -H 'content-type: application/json' \
+    -d '{
+      "affiliate": "partnerX",
+      "utm_source": "newsletter",
+      "utm_medium": "email",
+      "utm_campaign": "summer-2025",
+      "utm_term": "low-apr",
+      "utm_content": "cta-button"
+    }'
+  ```
+
 ## Deployment
 
 This project supports blue‑green deployment to minimize downtime. See [Release Process](RELEASE_PROCESS.md) for full details. Quick reference:

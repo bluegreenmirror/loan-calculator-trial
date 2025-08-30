@@ -117,6 +117,11 @@ def create_lead(lead: LeadReq):
 
 class TrackReq(BaseModel):
     affiliate: str = Field(min_length=1)
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    utm_term: Optional[str] = None
+    utm_content: Optional[str] = None
 
 
 class TrackResp(BaseModel):
@@ -126,7 +131,8 @@ class TrackResp(BaseModel):
 @app.post("/api/track", response_model=TrackResp)
 def track_click(track: TrackReq):
     track_file = _data_file("tracks.json")
-    entry = track.model_dump()
+    entry = track.model_dump(exclude_none=True)
+    entry["timestamp"] = datetime.utcnow().isoformat()
     if os.path.exists(track_file):
         with open(track_file) as f:
             data = json.load(f)

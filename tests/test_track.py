@@ -57,3 +57,26 @@ def test_track_corrupt_file_returns_500_and_unmodified(tmp_path, monkeypatch):
         resp = c.post("/api/track", json=payload)
     assert resp.status_code == 500
     assert track_file.read_text() == original
+
+
+def test_track_persists_utms_when_provided(tmp_path, monkeypatch):
+    """Posting UTMs along with affiliate should persist those fields server-side."""
+    monkeypatch.setenv("PERSIST_DIR", str(tmp_path))
+    payload = {
+        "affiliate": "partnerX",
+        "utm_source": "newsletter",
+        "utm_medium": "email",
+        "utm_campaign": "summer-2025",
+        "utm_term": "low-apr",
+        "utm_content": "cta-button"
+    }
+    resp = client.post("/api/track", json=payload)
+    assert resp.status_code == 200
+    data = json.loads((tmp_path / "tracks.json").read_text())
+    assert data[0]["affiliate"] == "partnerX"
+    # UTMs are optional but should be present when provided
+    assert data[0]["utm_source"] == "newsletter"
+    assert data[0]["utm_medium"] == "email"
+    assert data[0]["utm_campaign"] == "summer-2025"
+    assert data[0]["utm_term"] == "low-apr"
+    assert data[0]["utm_content"] == "cta-button"
