@@ -40,3 +40,63 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Docker images
         run: docker compose build
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Run pytest
+        run: |
+          . .venv/bin/activate
+          pytest -q
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install minimal runtime deps
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Start API (background)
+        run: |
+          . .venv/bin/activate
+          uvicorn api.app:app --host 127.0.0.1 --port 8000 & echo $! > uvicorn.pid
+          sleep 1
+      - name: Curl /api/health
+        run: |
+          for i in {1..20}; do
+            resp=$(curl -fsS http://127.0.0.1:8000/api/health || true)
+            echo "$resp"
+            echo "$resp" | grep -Eq '"ok"\s*:\s*true' && break
+            sleep 0.5
+            if [ "$i" -eq 20 ]; then
+              echo "API health check failed" >&2
+              exit 1
+            fi
+          done
+      - name: Stop API
+        if: always()
+        run: |
+          kill $(cat uvicorn.pid) 2>/dev/null || true
