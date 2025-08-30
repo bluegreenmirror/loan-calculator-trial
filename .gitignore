@@ -40,3 +40,8 @@ docker-compose.override.yml
 !web/dist/app.js
 !web/dist/privacy.html
 !web/dist/terms.html
+
+# Runtime artifacts (local only)
+uvicorn.log
+uvicorn.pid
+uv.pid
