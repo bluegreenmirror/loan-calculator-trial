@@ -1,6 +1,10 @@
 SHELL := /bin/bash
 VENV_PREFIX = .venv/bin/
 
+# Default project name for docker-compose when not provided by environment.
+# Ensures container_name templates like "${PROJECT_NAME}-caddy" are valid.
+export PROJECT_NAME ?= loancalc
+
 # Prefer local .env, fall back to .env.example for CI
 ENV_FILE := $(firstword $(wildcard .env .env.example))
 DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
