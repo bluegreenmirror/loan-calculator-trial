@@ -75,6 +75,7 @@ This project supports blue‑green deployment to minimize downtime. See [Release
   - `.env` has: `DOMAIN`, `APEX_HOST`, `WWW_HOST`, `EMAIL`, and `TLS_DIRECTIVE=tls ${EMAIL}`.
   - One‑time infra: `docker network create edge-net` and `docker volume create edge_caddy_data`.
   - Cloudflare (if used): SSL/TLS mode “Full” or “Full (strict)”, apex/www DNS → server IP.
+  - Never commit a real `.env`. Keep only `.env.example` in git and generate `.env` in CI/CD or locally.
 
 - Deploy and validate:
 
@@ -172,10 +173,10 @@ Pull requests trigger GitHub Actions to run linters and build all Docker images.
 
 ## Roadmap
 
-- Add lead form to front‑end and connect to `/api/leads`.
-- Add JS to record affiliate clicks via `/api/track`.
 - Support additional asset classes (boats, heavy equipment).
 - Provide dealership analytics and export functionality.
+- Persist UTM parameters server‑side (currently stored client‑side only).
+- Add CI smoke test that boots the API and curls `/api/health`.
 
 ## Contributing
 
