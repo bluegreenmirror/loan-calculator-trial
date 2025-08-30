@@ -38,13 +38,24 @@ else
   fail "WWW Location should point to https://$WWW_HOST or https://$APEX_HOST, got '$loc'"
 fi
 
-# 3) WWW HTTPS serves HTML with 200
-# Use GET (not HEAD) so CDNs that omit some headers on HEAD don't cause false negatives
+# 3) WWW HTTPS should serve or redirect to canonical host
+# Accept either 200 (serves HTML at www) OR 301/308 redirect to apex/www per config
 code=$(curl -s -o /dev/null -w '%{http_code}' "https://$WWW_HOST/") || true
-[[ "$code" == "200" ]] || fail "HTTPS GET expected 200, got $code"
-ctype=$(curl -s -o /dev/null -w '%{content_type}' "https://$WWW_HOST/")
-echo "$ctype" | tr '[:upper:]' '[:lower:]' | grep -qi 'text/html' || fail "Content-Type should include text/html, got '$ctype'"
-pass "WWW HTTPS returns 200 and HTML"
+if [[ "$code" == "200" ]]; then
+  ctype=$(curl -s -o /dev/null -w '%{content_type}' "https://$WWW_HOST/")
+  echo "$ctype" | tr '[:upper:]' '[:lower:]' | grep -qi 'text/html' || fail "Content-Type should include text/html, got '$ctype'"
+  pass "WWW HTTPS returns 200 and HTML"
+elif [[ "$code" == "301" || "$code" == "308" ]]; then
+  loc=$(curl -s -I "https://$WWW_HOST/" | awk -v IGNORECASE=1 '/^Location:/ {print $2}' | tr -d '\r')
+  if [[ "$loc" == https://$WWW_HOST/* || "$loc" == https://$WWW_HOST || \
+        "$loc" == https://$APEX_HOST/* || "$loc" == https://$APEX_HOST ]]; then
+    pass "WWW HTTPS redirects to $loc ($code)"
+  else
+    fail "WWW Location should point to https://$WWW_HOST or https://$APEX_HOST, got '$loc'"
+  fi
+else
+  fail "HTTPS GET expected 200 or 301/308, got $code"
+fi
 
 # 4) Optional HSTS header when configured
 if [[ -n "${HSTS_LINE}" ]]; then
@@ -64,9 +75,13 @@ if command -v openssl >/dev/null 2>&1; then
 fi
 pass "TLS validated by curl"
 
-# 6) Redirect loop safety check (should be 0 after reaching HTTPS root)
+# 6) Redirect loop safety check
+# Allow 0 redirects (serving at www) or 1 redirect (www -> apex)
 loops=$(curl -s -o /dev/null -w '%{num_redirects}' -L "https://$WWW_HOST/")
-[[ "$loops" == "0" ]] || fail "Unexpected redirects on HTTPS root (num_redirects=$loops)"
-pass "No redirects on HTTPS root"
+if [[ "$loops" == "0" || "$loops" == "1" ]]; then
+  pass "Redirect behavior OK on HTTPS root (num_redirects=$loops)"
+else
+  fail "Unexpected redirects on HTTPS root (num_redirects=$loops)"
+fi
 
 echo "All production checks passed."
