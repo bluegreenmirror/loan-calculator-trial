@@ -62,12 +62,33 @@ sed "s|##LIVE_UPSTREAM##|${PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.cad
 
 # Reload the main Caddy instance
 echo "Reloading edge Caddy instance..."
-docker compose up -d edge
+if docker ps -a --format '{{.Names}}' | grep -qx "loancalc-edge"; then
+  docker start loancalc-edge >/dev/null 2>&1 || true
+else
+  docker compose up -d edge
+fi
 EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
-docker kill -s SIGHUP $EDGE_CONTAINER_ID
+docker kill -s SIGHUP "$EDGE_CONTAINER_ID"
 sleep 5
 
-# Health check on the live domain
+rollback_edge() {
+  echo "Rolling back edge to $OLD_PROJECT_NAME..."
+  sed "s|##LIVE_UPSTREAM##|${OLD_PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.caddyfile > Caddyfile.edge
+  local EDGE_ID
+  EDGE_ID=$(docker ps -qf "name=loancalc-edge")
+  docker kill -s SIGHUP "$EDGE_ID"
+  sleep 5
+}
+
+# Internal upstream health from edge container (network reachability)
+echo "Verifying upstream from edge network..."
+if ! docker run --rm --network=edge-net curlimages/curl:latest -sSf "http://${PROJECT_NAME}-caddy:80/api/health" > /dev/null; then
+  echo "Upstream not reachable from edge."
+  rollback_edge
+  exit 1
+fi
+
+# External live domain health (with retries)
 echo "Verifying live domain..."
 # Prefer explicit APEX_HOST from .env, else fallback to DOMAIN, else localhost (dev)
 LIVE_HOST="${APEX_HOST:-${DOMAIN:-localhost}}"
@@ -76,14 +97,17 @@ SCHEME="http"
 if [ "$LIVE_HOST" != "localhost" ]; then
   SCHEME="https"
 fi
-LIVE_URL="${SCHEME}://${LIVE_HOST}"
-if ! curl -ksSf "$LIVE_URL" > /dev/null; then
-  echo "Health check failed for live domain."
-  echo "Rolling back to $OLD_PROJECT_NAME..."
-  sed "s|##LIVE_UPSTREAM##|${OLD_PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.caddyfile > Caddyfile.edge
-  EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
-docker kill -s SIGHUP $EDGE_CONTAINER_ID
-sleep 5
+LIVE_URL="${SCHEME}://${LIVE_HOST}/api/health"
+ok=false
+for i in {1..10}; do
+  if curl -ksSf "$LIVE_URL" > /dev/null; then
+    ok=true; break
+  fi
+  sleep 2
+done
+if [ "$ok" != true ]; then
+  echo "Live domain health check failed for $LIVE_URL"
+  rollback_edge
   exit 1
 fi
 
