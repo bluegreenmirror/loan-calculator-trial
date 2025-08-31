@@ -35,6 +35,16 @@ Before you can deploy, you need the following:
 1.  **Docker and Docker Compose:** These are required to build and run the application.
 2.  **A Main Caddy Instance:** You need a main Caddy instance running on the host that acts as the front-facing reverse proxy. This Caddy instance is responsible for routing traffic to the active environment (blue or green).
 
+### One-time network and volumes
+
+Create the shared Docker network and volumes used by edge Caddy and API data:
+
+```bash
+docker network create edge-net || true
+docker volume create edge_caddy_data || true
+docker volume create app_data || true
+```
+
 ### Running the Main Caddy Instance
 
 To run the main Caddy instance, you can use the following command:
