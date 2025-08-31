@@ -104,3 +104,42 @@ jobs:
         if: always()
         run: |
           kill $(cat uvicorn.pid) 2>/dev/null || true
+
+  volume-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare shared network and volumes
+        run: |
+          docker network create edge-net || true
+          docker volume create edge_caddy_data || true
+          docker volume create app_data || true
+      - name: Bring up blue stack with compose
+        env:
+          PROJECT_NAME: loancalc-blue
+        run: |
+          docker compose -p "$PROJECT_NAME" up -d --build caddy api web
+      - name: Wait for API health
+        env:
+          PROJECT_NAME: loancalc-blue
+        run: |
+          docker run --rm --network=${PROJECT_NAME}_default curlimages/curl:latest -sSf http://api:8000/api/health > /dev/null
+      - name: Assert app_data volume exists
+        run: |
+          docker volume inspect app_data >/dev/null
+      - name: Assert /data mount in API container uses app_data
+        env:
+          PROJECT_NAME: loancalc-blue
+        run: |
+          CID=$(docker ps -q --filter "label=com.docker.compose.service=api" --filter "label=com.docker.compose.project=${PROJECT_NAME}")
+          echo "API container: $CID"
+          test -n "$CID"
+          docker inspect "$CID" | tee /tmp/inspect.json >/dev/null
+          grep -q '"Destination": "/data"' /tmp/inspect.json
+          grep -q '"Name": "app_data"' /tmp/inspect.json
+      - name: Tear down blue stack
+        if: always()
+        env:
+          PROJECT_NAME: loancalc-blue
+        run: |
+          docker compose -p "$PROJECT_NAME" down --remove-orphans || true
