@@ -9,6 +9,7 @@ DOMAIN=${DOMAIN:-localhost}
 echo "[validate-local] Creating shared network/volume if missing..."
 docker network create edge-net >/dev/null 2>&1 || true
 docker volume create edge_caddy_data >/dev/null 2>&1 || true
+docker volume create app_data >/dev/null 2>&1 || true
 
 COLOR=${1:-blue}
 if [[ "$COLOR" != "blue" && "$COLOR" != "green" ]]; then

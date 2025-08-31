@@ -62,7 +62,7 @@ Base URL in dev: `http://localhost`
     -d '{"name":"Jane Doe","email":"jane@example.com","phone":"+14155551212","vehicle_type":"rv","price":75000,"affiliate":"partnerX"}'
   ```
 
-Leads are stored in `leads.json` and tracking events in `tracks.json`, both inside `PERSIST_DIR` (default `/data`). Lead names must be non-empty and phone numbers (if provided) must include 10–15 digits with an optional leading `+`. Affiliate identifiers must not be empty. Invalid submissions are rejected and not written to disk.
+Leads are stored in `leads.json` and tracking events in `tracks.json`, both inside `PERSIST_DIR` (default `/data`). In Docker deployments, `/data` is backed by a named volume `app_data` shared across blue/green, so data persists through cutovers. Lead names must be non-empty and phone numbers (if provided) must include 10–15 digits with an optional leading `+`. Affiliate identifiers must not be empty. Invalid submissions are rejected and not written to disk.
 
 - Affiliate tracking (POST JSON):
 
@@ -111,7 +111,7 @@ This project supports blue‑green deployment to minimize downtime. See [Release
 - Production prerequisites:
 
   - `.env` has: `DOMAIN`, `APEX_HOST`, `WWW_HOST`, `EMAIL`, and `TLS_DIRECTIVE=tls ${EMAIL}`.
-  - One‑time infra: `docker network create edge-net` and `docker volume create edge_caddy_data`.
+  - One‑time infra: `docker network create edge-net && docker volume create edge_caddy_data && docker volume create app_data`.
   - Cloudflare (if used): SSL/TLS mode “Full” or “Full (strict)”, apex/www DNS → server IP.
   - Never commit a real `.env`. Keep only `.env.example` in git and generate `.env` in CI/CD or locally.
 
@@ -126,6 +126,15 @@ This project supports blue‑green deployment to minimize downtime. See [Release
   - `make validate-local` brings up a color stack, points edge to it, and verifies:
     - `http://localhost` returns HTML
     - `http://localhost/api/health` returns `{ "ok": true }`
+
+### Persistent data and inspection
+
+The API writes JSON to `PERSIST_DIR` (default `/data`). In Docker, this path is mounted from the shared named volume `app_data`, so both blue and green environments use the same data.
+
+- List files (blue): `docker compose -p loancalc-blue exec api sh -lc 'ls -lah ${PERSIST_DIR:-/data}'`
+- Show leads (blue): `docker compose -p loancalc-blue exec api sh -lc 'cat ${PERSIST_DIR:-/data}/leads.json || echo "no leads.json"'`
+- Show tracks (blue): `docker compose -p loancalc-blue exec api sh -lc 'cat ${PERSIST_DIR:-/data}/tracks.json || echo "no tracks.json"'`
+- Replace `loancalc-blue` with `loancalc-green` to inspect the other color.
 
 ## Testing
 
@@ -194,6 +203,8 @@ pytest -k 'not external'
 ## Continuous Integration
 
 Pull requests trigger GitHub Actions to run linters and build all Docker images.
+
+- Includes a compose smoke job that boots a blue stack, verifies `/api/health`, asserts the `app_data` Docker volume exists, and confirms it is mounted at `/data` in the API container.
 
 ## Repository layout
 

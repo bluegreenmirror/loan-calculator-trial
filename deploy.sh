@@ -20,9 +20,10 @@ if [ "$ENV" != "blue" ] && [ "$ENV" != "green" ]; then
   exit 1
 fi
 
-# Create external network and volume if they don't exist
+# Create external network and volumes if they don't exist
 docker network create edge-net || true
 docker volume create edge_caddy_data || true
+docker volume create app_data || true
 
 # Set environment variables based on the chosen environment
 if [ "$ENV" == "blue" ]; then

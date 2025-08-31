@@ -39,6 +39,8 @@ services:
     restart: unless-stopped
     networks:
       - default
+    volumes:
+      - app_data:/data
 
   web:
     build: ./web
@@ -56,6 +58,8 @@ services:
 
 volumes:
   edge_caddy_data:
+    external: true
+  app_data:
     external: true
 
 networks:
