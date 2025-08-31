@@ -20,9 +20,18 @@ if [ "$ENV" != "blue" ] && [ "$ENV" != "green" ]; then
   exit 1
 fi
 
-# Create external network and volume if they don't exist
+# Load environment from .env if present (for DOMAIN/APEX_HOST/WWW_HOST, etc.)
+if [ -f .env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env
+  set +a
+fi
+
+# Create external network and volumes if they don't exist
 docker network create edge-net || true
 docker volume create edge_caddy_data || true
+docker volume create app_data || true
 
 # Set environment variables based on the chosen environment
 if [ "$ENV" == "blue" ]; then
@@ -60,13 +69,20 @@ sleep 5
 
 # Health check on the live domain
 echo "Verifying live domain..."
-LIVE_URL="https://$DOMAIN"
+# Prefer explicit APEX_HOST from .env, else fallback to DOMAIN, else localhost (dev)
+LIVE_HOST="${APEX_HOST:-${DOMAIN:-localhost}}"
+# Use HTTPS for real hosts; HTTP for localhost/dev
+SCHEME="http"
+if [ "$LIVE_HOST" != "localhost" ]; then
+  SCHEME="https"
+fi
+LIVE_URL="${SCHEME}://${LIVE_HOST}"
 if ! curl -ksSf "$LIVE_URL" > /dev/null; then
   echo "Health check failed for live domain."
   echo "Rolling back to $OLD_PROJECT_NAME..."
   sed "s|##LIVE_UPSTREAM##|${OLD_PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.caddyfile > Caddyfile.edge
   EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
-docker kill -s SIGHUP $EDGE_CONTAINER_ID
+  docker kill -s SIGHUP $EDGE_CONTAINER_ID
 sleep 5
   exit 1
 fi
