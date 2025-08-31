@@ -62,9 +62,13 @@ sed "s|##LIVE_UPSTREAM##|${PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.cad
 
 # Reload the main Caddy instance
 echo "Reloading edge Caddy instance..."
-docker compose up -d edge
+if docker ps -a --format '{{.Names}}' | grep -qx "loancalc-edge"; then
+  docker start loancalc-edge >/dev/null 2>&1 || true
+else
+  docker compose up -d edge
+fi
 EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
-docker kill -s SIGHUP $EDGE_CONTAINER_ID
+docker kill -s SIGHUP "$EDGE_CONTAINER_ID"
 sleep 5
 
 rollback_edge() {
@@ -77,8 +81,8 @@ rollback_edge() {
 }
 
 # Internal upstream health from edge container (network reachability)
-echo "Verifying upstream from edge container..."
-if ! docker exec "$EDGE_CONTAINER_ID" sh -lc "curl -sSf http://${PROJECT_NAME}-caddy:80/api/health > /dev/null"; then
+echo "Verifying upstream from edge network..."
+if ! docker run --rm --network=edge-net curlimages/curl:latest -sSf "http://${PROJECT_NAME}-caddy:80/api/health" > /dev/null; then
   echo "Upstream not reachable from edge."
   rollback_edge
   exit 1
