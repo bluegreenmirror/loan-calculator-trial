@@ -96,6 +96,13 @@ This project supports blue‑green deployment to minimize downtime. See [Release
   - Deploy blue: `./deploy.sh blue`
   - Validate prod: `make validate-prod`
   - Switch to green: `./deploy.sh green`
+  - Shut down inactive color:
+    - If live is green: `docker compose -p loancalc-blue down --remove-orphans`
+    - If live is blue: `docker compose -p loancalc-green down --remove-orphans`
+
+Notes:
+
+- `deploy.sh` reads `.env` for `APEX_HOST`/`WWW_HOST`/`DOMAIN`. For live verification it prefers `APEX_HOST`, then `DOMAIN`, and falls back to `localhost` in dev.
 
 - Local validation:
 
