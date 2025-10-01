@@ -8,7 +8,11 @@ This document is the **operating contract** for collaboration. Follow it exactly
 ## Roles
 
 - **Builder Agent**: Implements features/fixes in _small, atomic_ commits; adds/updates tests.
+  - **Scope guard**: If a request mixes multiple concerns, the Builder must stop, document the conflict,
+    and ask for the work to be split into separate PRs before coding.
 - **Reviewer Agent**: Ensures PRs follow scope, quality, and documentation requirements.
+  - **Atomicity enforcement**: Reject reviews that expand scope or bundle unrelated changes. Require new PRs
+    when feedback introduces additional features or chores outside the original goal.
 - **Deployment Agent**: Builds & deploys (blue/green), creates `.env` from CI secrets, validates health.
 - **Infra Agent**: Proposes & updates Docker/Caddy/Cloudflare/DB/CI; keeps changes backward compatible.
 
@@ -18,9 +22,16 @@ This document is the **operating contract** for collaboration. Follow it exactly
 
 ### 1) Atomicity
 
-- One PR = one logical change.  
-  _Examples_: add API endpoint **or** update Caddy config **or** docs refresh.  
+- One PR = one logical change. No exceptions.
+  _Examples_: add API endpoint **or** update Caddy config **or** docs refresh.
   _Non-examples_: app feature + infra + formatting in one PR.
+- **Enforcement workflow**:
+  1. Author documents the single change scope in the PR description before coding.
+  2. If, during review or follow-up requests, new scope appears, the author must open a **new branch/PR**
+     and sequence it after the current one.
+  3. Reviewers reject PRs that attempt to incorporate additional scope instead of spawning a new PR.
+  4. Agents must never accept “just add this quick extra” in the same PR; log the request in an issue or
+     TODO for the follow-up PR.
 
 ### 2) Branch naming
 

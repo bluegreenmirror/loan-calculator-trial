@@ -250,3 +250,14 @@ Before you push (humans and agents):
 - Always run `make lint` and fix issues.
 - Run `make format` to apply formatters (Python/Markdown/Caddyfile) to touched files.
 - Keep PRs atomic; include tests and curl examples for API changes.
+- If a reviewer asks for work outside the stated scope, open a follow-up issue/PR and sequence it after the
+  current one instead of expanding the branch.
+
+### Atomic PR policy
+
+- One branch/PR = one logical change. Do not mix docs, infra, and feature work together.
+- Document the scope in the PR template summary before coding. Treat it as the contract for the review.
+- During review, classify feedback as either **in-scope** (must land here) or **out-of-scope** (requires a new
+  PR). Record out-of-scope items as TODOs or issues to preserve the sequence.
+- Never accept “quick extras” in the same PR. Splitting work keeps reviews small, reversible, and easy to
+  deploy.

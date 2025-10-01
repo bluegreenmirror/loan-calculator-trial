@@ -41,9 +41,33 @@ We follow Conventional Commits:
 
 ## Pull Requests
 
-- Keep PRs atomic (small and focused).
+- Keep PRs atomic (small and focused). One PR must map to exactly one scoped change.
+- Document the intended scope in the PR description before coding.
 - Include description and test plan.
 - Reference related issues if any.
+
+### Author checklist
+
+1. Confirm the change list stays inside the documented scope. If new requirements arise, pause the work and
+   create a follow-up issue/PR instead of expanding the current one.
+1. Keep commits linear and focused on the defined scope. Avoid “drive-by” refactors.
+1. When review feedback requests additional functionality outside the scope, note it as `Out of scope` in the
+   conversation and plan a separate PR.
+
+### Reviewer checklist
+
+1. Verify the PR description clearly states the single scope.
+1. Reject or block if unrelated changes are present or if feedback would broaden the scope. Ask for a new PR
+   when extra work is required.
+1. Ensure any “quick follow-up” suggestion is tracked as a separate issue/PR before approval.
+
+### Handling revisions
+
+- If reviewers discover a missing piece that _belongs_ to the original scope, request it as part of the same PR.
+- If the request is new scope, document it in the discussion and require the author to open a follow-up PR after
+  merging (or decline approval until it is split).
+- Do not chain multiple scopes in one branch; sequence them through separate PRs that merge into `main` one at a
+  time.
 
 ## Code Style
 
