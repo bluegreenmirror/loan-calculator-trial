@@ -34,7 +34,7 @@ Deliver a fast, responsive, and extensible loan calculator platform that support
 - Presets per loan type; responsive UI; embeddable widget variant.
 - Outputs: monthly payment, amount financed, total cost, total interest; pie/legend chart.
 
-2. APIs (v1)
+1. APIs (v1)
 
 - `GET /api/v1/health`: service health.
 - `POST /api/v1/calculators/<type>`: compute payments and amortization schedule.
@@ -42,17 +42,17 @@ Deliver a fast, responsive, and extensible loan calculator platform that support
 - `POST /api/v1/track`: record affiliate/UTM events.
 - `GET /api/v1/partners`: list partner offers/cards (MVP static or JSON-backed).
 
-3. Lead Token Gating
+1. Lead Token Gating
 
 - Viewing amortization schedules and exports requires a valid token from `/leads`.
 - Store token + basic lead data; optionally verify later (future scope).
 
-4. Affiliate/UTM Tracking
+1. Affiliate/UTM Tracking
 
 - Accept affiliate and UTM parameters; persist with timestamps.
 - Surface minimal analytics (counts, CTRs) in future iterations.
 
-5. Persistence
+1. Persistence
 
 - v2 baseline: migrate from JSON files to Postgres; Alembic migrations; Cloud SQL targeted for prod.
 
@@ -77,28 +77,28 @@ Deliver a fast, responsive, and extensible loan calculator platform that support
 - Routers under `/api/v1`; legacy `/api/*` remains temporarily.
 - Tests + curl examples; CI updated.
 
-2. Vehicle Calculator + Amortization
+1. Vehicle Calculator + Amortization
 
 - Implement schedule math; unit tests validate totals and per-period sums.
 
-3. Postgres Baseline
+1. Postgres Baseline
 
 - Compose Postgres for dev; SQLAlchemy models (leads, tracks, partners);
   Alembic init + first migration; `.env.example` DATABASE_URL placeholder.
 
-4. Lead Token Gate
+1. Lead Token Gate
 
 - `/leads` issues token; calculators schedule/export path requires token; integration tests.
 
-5. Additional Calculators
+1. Additional Calculators
 
 - Mortgage, HELOC, personal calculators share common math utilities; tests for each.
 
-6. Partners API + UI
+1. Partners API + UI
 
 - `GET /partners` returns card data; minimal swipe UI on web; e2e smoke.
 
-7. Staging/Prod Readiness
+1. Staging/Prod Readiness
 
 - CI runs migrations; smoke tests for `/api/v1/*`; Caddy validate/adapt passes.
 - Blue/green deploy docs and validate_prod scripts updated.
