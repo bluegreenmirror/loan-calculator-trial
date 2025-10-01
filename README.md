@@ -94,6 +94,9 @@ Leads are stored in `leads.json` and tracking events in `tracks.json`, both insi
   - Point the `edge` Caddy to that stack without modifying repo files.
   - Verify the site root and `/api/health` through `http://localhost`.
 
+> **Project name:** Docker Compose requires `PROJECT_NAME` to build service container names. Run `./scripts/check-env.sh`
+> after copying `.env.example`; it will reuse the existing value or prompt you for a project name if the variable is missing.
+
 If you prefer manual compose:
 
 ```bash
