@@ -74,12 +74,14 @@ We follow Conventional Commits:
 - Python: PEP8 + type hints.
 - HTML/JS: Prettier defaults, semantic HTML.
 - YAML: 2-space indentation
-- Always run `make lint` before committing and fix any issues.
+- Always run `make lint` before committing and fix any issues (or use `make verify` to run lint + tests together).
+- Run `make test` before committing or opening a PR; `make verify` is encouraged for the full lint + test suite.
 - Run `make format` to apply formatters to touched files.
 - You can also use `pre-commit run --all-files` locally.
 
 ## Required checks (humans and agents)
 
+- `make test` must pass locally before pushing. Running `make verify` satisfies this and linting in one step.
 - `make lint` must pass (Python, YAML, Markdown, Caddyfile).
 - For API changes: add/adjust tests and include curl examples in the PR.
 
@@ -91,8 +93,9 @@ We follow Conventional Commits:
 
 ## Testing
 
-- Backend: test with curl requests.
+- Backend: run `make test` for automated coverage, then exercise endpoints with curl requests as needed.
 - Frontend: load http://localhost and verify calculator + lead form.
+- Optionally run `make verify` to combine linting and automated tests for a production-ready confidence check.
 
 ## Issues
 

@@ -151,11 +151,16 @@ The API writes JSON to `PERSIST_DIR` (default `/data`). In Docker, this path is 
 
 ## Testing
 
-Run linting and the test suite locally before building. For fast, hermetic tests (no Docker), run pytest without external checks.
+Run linting and the automated test suite locally before you begin making changes so you start from a clean
+baseline. Every PR must call out the exact test commands that were executed. At minimum, contributors are
+required to run `make test` (or the broader `make verify`) before committing or opening a PR.
+
+For fast, hermetic checks (no Docker), run the commands below:
 
 ```bash
 pip install -r requirements-dev.txt
-make verify  # or `make test` to run tests only
+make test      # required before committing or opening a PR
+make verify    # optional superset with lint + tests
 ```
 
 ### External checks
