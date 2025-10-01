@@ -1,4 +1,4 @@
-# Vehicle Loan Calculator — Product Requirements Document (PRD)
+# Vehicle Loan Calculator -- Product Requirements Document (PRD)
 
 ## Vision
 
