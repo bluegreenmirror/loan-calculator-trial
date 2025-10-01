@@ -37,17 +37,26 @@ lint-docker: ## Build lint image which runs checks at build-time
 	$(COMPOSE_DEV) build lint
 
 lint-caddy: ## Validate Caddyfile syntax
-	# Validate the main Caddyfile
-	docker run --rm $(DOCKER_ENV_FLAG) -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2.8 caddy validate --config /etc/caddy/Caddyfile
+        # Validate the main Caddyfile
+	@if command -v docker >/dev/null 2>&1; then\
+		docker run --rm $(DOCKER_ENV_FLAG) -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2.8 caddy validate --config /etc/caddy/Caddyfile;\
+	else\
+		echo "Docker is not available; skipping Caddyfile validation.";\
+	fi
 
 format-caddy: ## Format Caddyfile
 	docker run --rm -v $(PWD)/Caddyfile:/etc/caddy/Caddyfile caddy:2.8 caddy fmt --overwrite /etc/caddy/Caddyfile
 	docker run --rm -v $(PWD)/Caddyfile.edge.template.caddyfile:/etc/caddy/Caddyfile.edge.template.caddyfile caddy:2.8 caddy fmt --overwrite /etc/caddy/Caddyfile.edge.template.caddyfile
 
 test: ## Run unit and integration tests
-	$(COMPOSE_DEV) up -d
-	$(VENV_PREFIX)pytest
-	$(COMPOSE_DEV) down
+	@if command -v docker >/dev/null 2>&1; then \
+		trap '$(COMPOSE_DEV) down' EXIT; \
+		$(COMPOSE_DEV) up -d; \
+		$(VENV_PREFIX)pytest; \
+	else \
+		echo "Docker is not available; running pytest without containers."; \
+		$(VENV_PREFIX)pytest; \
+	fi
 
 verify: lint test ## Lint and run tests
 

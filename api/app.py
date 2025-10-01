@@ -1,10 +1,12 @@
 import json
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, EmailStr, Field
 
 app = FastAPI(title="Dealer Quote API", version="0.1.0")
@@ -86,6 +88,33 @@ def _data_file(filename: str) -> str:
     return os.path.join(data_dir, filename)
 
 
+def _static_root() -> Optional[Path]:
+    root = os.getenv("STATIC_ROOT")
+    if not root:
+        return None
+    path = Path(root)
+    if path.is_dir():
+        return path
+    return None
+
+
+def _index_path(root: Path) -> Optional[Path]:
+    index = root / "index.html"
+    if index.is_file():
+        return index
+    return None
+
+
+def _serve_index() -> HTMLResponse:
+    root = _static_root()
+    if not root:
+        raise HTTPException(status_code=404)
+    index = _index_path(root)
+    if not index:
+        raise HTTPException(status_code=404)
+    return HTMLResponse(index.read_text(encoding="utf-8"))
+
+
 class LeadReq(BaseModel):
     name: str = Field(min_length=1)
     email: EmailStr
@@ -142,3 +171,35 @@ def track_click(track: TrackReq):
     with open(track_file, "w") as f:
         json.dump(data, f)
     return TrackResp(message="Tracked")
+
+
+@app.get("/", response_class=HTMLResponse)
+def serve_index():
+    """Serve the SPA entrypoint when STATIC_ROOT is configured."""
+    return _serve_index()
+
+
+@app.get("/{path:path}")
+def serve_static(path: str):
+    """Serve built assets or fall back to the SPA entrypoint."""
+    if path.startswith("api/"):
+        raise HTTPException(status_code=404)
+
+    root = _static_root()
+    if not root:
+        raise HTTPException(status_code=404)
+
+    candidate = (root / path).resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError as exc:  # Path traversal attempt
+        raise HTTPException(status_code=404) from exc
+
+    if candidate.is_file():
+        return FileResponse(candidate)
+
+    index = _index_path(root)
+    if not index:
+        raise HTTPException(status_code=404)
+
+    return HTMLResponse(index.read_text(encoding="utf-8"))

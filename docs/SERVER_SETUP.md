@@ -1,5 +1,10 @@
 # Server Setup
 
+> **Note:** For the new managed Cloud Run deployment (no VM required), follow
+> [docs/migration-google-cloud-run.md](migration-google-cloud-run.md). This
+> document remains for teams that still run the legacy Docker blue/green stack
+> on their own servers.
+
 This guide covers preparing a fresh Ubuntu/Debian server and deploying the
 stack using the provided `deploy.sh` script with blue/green.
 

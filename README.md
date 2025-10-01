@@ -109,7 +109,10 @@ curl -s http://localhost/api/health
 
 ## Deployment
 
-This project supports blue‑green deployment to minimize downtime. See [Release Process](RELEASE_PROCESS.md) for full details. Quick reference:
+This project supports two deployment models:
+
+1. **Google Cloud Run (lightweight managed hosting)** — Recommended going forward. The repo now ships with [`Dockerfile.cloudrun`](Dockerfile.cloudrun), letting FastAPI serve both the API and SPA directly. Follow the [Cloud Run migration guide](docs/migration-google-cloud-run.md) for setup, bucket mounting, and DNS cutover steps.
+1. **Legacy Docker blue/green** — Still available for existing servers. See [Release Process](RELEASE_PROCESS.md) for full details. Quick reference:
 
 - Production prerequisites:
 
