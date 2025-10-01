@@ -79,6 +79,25 @@ Keep formatting scoped to touched files unless doing a dedicated fmt PR.
 
 - **Markdown**: `make lint-md`
 
+### Markdown authoring standards (mdlint compliant)
+
+When creating or updating Markdown files, follow these conventions so `make lint-md`
+passes consistently:
+
+- Start each file with a single `#` level-one heading that summarizes the page.
+- Increment heading levels by one level at a time (no skipping from `##` to `####`).
+- Insert a blank line before and after headings, lists, blockquotes, and code fences.
+- Use `-` for unordered list markers and keep list text aligned; indent nested list
+  content by two spaces.
+- Use `1.` for every ordered list item so Markdown auto-numbers lists consistently.
+- Wrap paragraphs at 120 characters or fewer to improve diffs while satisfying
+  markdownlint line-length rules.
+- Provide a language hint for fenced code blocks (for example, ```` ```bash ````)
+  whenever the snippet represents a specific language or shell.
+- Avoid trailing whitespace and ensure files end with a single newline.
+- Reference links using inline Markdown syntax unless a shared reference list is
+  required; keep link reference identifiers in lowercase.
+
 - **Caddyfile**: `make lint-caddy` (uses official image)
 
 - **EditorConfig**: enforce LF, UTF-8, trimming, 2-space indent default (4 for `.py`, tabs for Makefile)
