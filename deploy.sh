@@ -27,7 +27,6 @@ if [ -f .env ]; then
   . ./.env
   set +a
 fi
-
 # Create external network and volumes if they don't exist
 docker network create edge-net || true
 docker volume create edge_caddy_data || true

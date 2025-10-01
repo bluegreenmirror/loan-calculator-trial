@@ -1,14 +1,7 @@
 # Server Setup
 
 This guide covers preparing a fresh Ubuntu/Debian server and deploying the
-stack using the provided `deploy.sh` script. It offers two deployment options:
-
-- Option 1: Build with verification (runs linters/tests on server)
-- Option 2: Build without verification (faster, minimal server footprint)
-
-Both options result in the same running containers. CI should already enforce
-style and tests on pull requests, so most teams prefer Option 2 for servers and
-keep verification in CI and local dev.
+stack using the provided `deploy.sh` script with blue/green.
 
 ## Prerequisites
 
@@ -23,52 +16,39 @@ keep verification in CI and local dev.
 
 ## Bootstrap the server (one time)
 
-Installs Docker, Compose plugin, `make`, and Python venv tools; adds your user
-to the `docker` group.
+Install Docker Engine, the Compose plugin, and add your user to the `docker`
+group. Refer to the official Docker docs for your distro.
 
-```bash
-./deploy.sh --bootstrap
-# Important: re-login or run the following so the docker group applies
-newgrp docker
-```
+## Deploy (blue/green)
 
-## Option 2: Deploy without verification (recommended for servers)
-
-This option keeps production hosts lean and deploys faster by skipping dev-only
-tooling (linters, test runners) on the server. CI already runs these checks on
-pull requests. You can still run full verification locally and in CI.
+`deploy.sh` supports two colors: `blue` and `green`. It builds and brings up
+the specified color, health-checks it internally, then points the `edge` Caddy
+at the new color. If the edge check fails, it reverts to the previous color.
 
 Steps:
 
 ```bash
-# Build images and pull latest base layers
-./deploy.sh --build --pull
+# One-time infra
+docker network create edge-net || true
+docker volume create edge_caddy_data || true
 
-# Check health
-curl -I http://$(grep ^DOMAIN .env | cut -d= -f2)
+# Deploy blue
+./deploy.sh blue
+
+# Deploy green on next release
+./deploy.sh green
 ```
 
-Why choose this option:
+## Verification
 
-- Minimizes packages on production hosts (smaller attack surface).
-- Faster deploys and fewer moving parts on the server.
-- CI already enforces code quality; duplication on servers is unnecessary.
-
-## Option 1: Deploy with verification on server
-
-Runs `make verify` (ruff, black, yamllint, mdformat, pytest). Requires a Python
-virtual environment and dev dependencies.
-
-Steps:
+After a cutover, run production validation:
 
 ```bash
-./deploy.sh --build --pull --verify
+make validate-prod
 ```
 
-Notes:
-
-- The script automatically creates `.venv` and installs `requirements-dev.txt`.
-- If `docker` needs elevated permissions, the script falls back to `sudo docker`.
+This validates apex/www redirects, TLS, and `/api/health` over HTTPS. See
+`scripts/validate_prod.sh` and `scripts/validate_caddy_prod.sh` for details.
 
 ## Environment variables
 
@@ -93,8 +73,8 @@ TLS_DIRECTIVE=tls ${EMAIL}
 - Caddyfile validation fails in CI due to missing `.env`:
   - The Makefile uses `.env` or `.env.example`; ensure `.env.example` contains
     the placeholders used by `Caddyfile`.
-- `make: command not found` during `--verify`:
-  - Install via `./deploy.sh --bootstrap` or `sudo apt-get install -y make`.
+- `make: command not found` on server:
+  - Install via your package manager, e.g. `sudo apt-get install -y make`.
 - Health check shows non-200:
   - Confirm DNS points to the server and ports 80/443 are open in your firewall.
 
