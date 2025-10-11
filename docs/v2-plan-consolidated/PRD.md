@@ -2,16 +2,25 @@
 
 ## Overview
 
-Deliver a fast, responsive, and extensible loan calculator platform that supports multiple loan types (vehicle, mortgage, HELOC, personal) with embeddable widgets, affiliate/partners integrations, and lead capture. v2 standardizes versioned APIs, adds amortization schedules, and lays groundwork for Cloud SQL-backed persistence and analytics.
+Deliver a fast, responsive, and extensible loan calculator platform that supports
+multiple loan types (vehicle, mortgage, HELOC, personal) with embeddable widgets,
+affiliate/partners integrations, and lead capture. v2 standardizes versioned APIs, adds
+amortization schedules, and lays groundwork for Cloud SQL-backed persistence and
+analytics.
 
 ## Goals
 
-- Platform: Modular calculators with shared math/utilities and versioned REST APIs under `/api/v1`.
-- Calculators: Vehicle, mortgage, HELOC, and personal loan calculators with presets and mobile-first UI.
+- Platform: Modular calculators with shared math/utilities and versioned REST APIs under
+  `/api/v1`.
+- Calculators: Vehicle, mortgage, HELOC, and personal loan calculators with presets and
+  mobile-first UI.
 - Amortization: API returns monthly schedules (principal/interest breakdown) and totals.
-- Lead Gen: Capture email/phone; issue tokens required to view/download amortization/export artifacts.
-- Affiliates/Partners: Track UTMs/affiliate IDs; add swipe-based partners/products UI and API.
-- Deployment: Containerized, Caddy fronted, blue/green deployments; Cloudflare Full (strict) in prod.
+- Lead Gen: Capture email/phone; issue tokens required to view/download
+  amortization/export artifacts.
+- Affiliates/Partners: Track UTMs/affiliate IDs; add swipe-based partners/products UI
+  and API.
+- Deployment: Containerized, Caddy fronted, blue/green deployments; Cloudflare Full
+  (strict) in prod.
 
 ## Non-Goals (v2)
 
@@ -32,7 +41,8 @@ Deliver a fast, responsive, and extensible loan calculator platform that support
 
 - Inputs: amount/price, down payment, trade-in (vehicle), fees, tax rate, APR, term.
 - Presets per loan type; responsive UI; embeddable widget variant.
-- Outputs: monthly payment, amount financed, total cost, total interest; pie/legend chart.
+- Outputs: monthly payment, amount financed, total cost, total interest; pie/legend
+  chart.
 
 1. APIs (v1)
 
@@ -54,13 +64,15 @@ Deliver a fast, responsive, and extensible loan calculator platform that support
 
 1. Persistence
 
-- v2 baseline: migrate from JSON files to Postgres; Alembic migrations; Cloud SQL targeted for prod.
+- v2 baseline: migrate from JSON files to Postgres; Alembic migrations; Cloud SQL
+  targeted for prod.
 
 ## Non-Functional Requirements
 
 - Performance: API p95 \< 300ms typical calc; initial page \< 1s on broadband.
 - Reliability: health endpoint; smoke tests for critical paths.
-- Security/Privacy: HTTPS in prod; input validation; no secrets in repo; basic PII handling guidance.
+- Security/Privacy: HTTPS in prod; input validation; no secrets in repo; basic PII
+  handling guidance.
 - Maintainability: modular code; tests; linted and formatted; versioned endpoints.
 
 ## Success Metrics (MVP Targets)
@@ -83,12 +95,13 @@ Deliver a fast, responsive, and extensible loan calculator platform that support
 
 1. Postgres Baseline
 
-- Compose Postgres for dev; SQLAlchemy models (leads, tracks, partners);
-  Alembic init + first migration; `.env.example` DATABASE_URL placeholder.
+- Compose Postgres for dev; SQLAlchemy models (leads, tracks, partners); Alembic init +
+  first migration; `.env.example` DATABASE_URL placeholder.
 
 1. Lead Token Gate
 
-- `/leads` issues token; calculators schedule/export path requires token; integration tests.
+- `/leads` issues token; calculators schedule/export path requires token; integration
+  tests.
 
 1. Additional Calculators
 

@@ -16,7 +16,7 @@ We welcome contributions from developers, product thinkers, and automation agent
 1. Install [`uv`](https://github.com/astral-sh/uv) and set up the virtual environment (one-time):
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
-   uv venv
+   uv venv --python 3.12
    uv pip install --requirements requirements-dev.txt
    uv run pre-commit install
    ```

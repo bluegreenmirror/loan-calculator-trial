@@ -28,7 +28,7 @@ cp .env.example .env   # no secrets; keep TLS vars empty for dev
 
 # One-time Python toolchain (venv) for lint/tests
 curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv
+uv venv --python 3.12
 uv pip install --requirements requirements-dev.txt
 
 # Bring up local stack and validate via edge proxy
@@ -187,7 +187,7 @@ pytest -k 'not external'
   ```bash
   # One-time setup (in repo root)
   curl -LsSf https://astral.sh/uv/install.sh | sh
-  uv venv
+  uv venv --python 3.12
   uv pip install --requirements requirements-dev.txt
 
   # Install git hooks
@@ -206,10 +206,10 @@ pytest -k 'not external'
   - Ensure the `uv` binary is on your `PATH` (the install script drops it in `~/.local/bin`).
   - Make targets call `uv run`, so you do not need to activate the virtual environment manually. Re-run `uv pip install --requirements requirements-dev.txt` whenever dependencies change.
 
-- Build-time check via Docker:
+- Build-time check via Docker (Python/YAML only; Markdown lint runs locally):
 
   ```bash
-  # Runs all linters at image build; fails on issues
+  # Runs Python and YAML linters at image build; fails on issues
   docker compose --profile dev build lint
   # or
   make lint-docker

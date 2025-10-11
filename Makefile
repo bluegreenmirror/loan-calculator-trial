@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 UV ?= uv
 UV_ENV = UV_PROJECT_ENVIRONMENT=.venv
-UV_RUN = $(UV_ENV) $(UV) run
+UV_RUN = $(UV_ENV) $(UV) run --python 3.12 --with-requirements requirements-dev.txt
 UV_PIP = $(UV_ENV) $(UV) pip
 
 # Default project name for docker-compose when not provided by environment.
@@ -14,8 +14,9 @@ DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 COMPOSE_DEV := docker compose --profile dev
 
 .PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release prod-validate release-tag rollback validate-local validate-prod
+
 setup-dev: ## Create venv and install dev deps using uv
-	$(UV) venv .venv
+	$(UV) venv --python 3.12 .venv
 	$(UV_PIP) install --requirements requirements-dev.txt
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters

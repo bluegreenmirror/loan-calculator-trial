@@ -15,8 +15,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 RUN uv pip install --system \
     black==24.8.* \
     ruff==0.6.* \
-    yamllint==1.35.* \
-    mdformat==0.7.* mdformat-gfm==0.3.*
+    yamllint==1.35.*
 
 # Copy repo
 COPY . /src
@@ -27,7 +26,5 @@ RUN echo "Running Python format check (black)" && \
     echo "Running Python lint (ruff)" && \
     ruff check api && \
     echo "Running YAML lint (yamllint)" && \
-    yamllint -s . && \
-    echo "Running Markdown format check (mdformat)" && \
-    mdformat --check README.md docs || (echo "Hint: run 'make format' locally to autofix." && false)
+    yamllint -s .
 

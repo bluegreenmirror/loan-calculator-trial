@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "==> Python linters and tests"
 if command -v uv >/dev/null 2>&1; then
-  PY_PREFIX="UV_PROJECT_ENVIRONMENT=.venv uv run"
+  PY_PREFIX="UV_PROJECT_ENVIRONMENT=.venv uv run --python 3.12 --with-requirements requirements-dev.txt"
 else
   if [ -d .venv ]; then
     PY_PREFIX=". .venv/bin/activate &&"

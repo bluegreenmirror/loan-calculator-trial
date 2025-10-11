@@ -2,7 +2,6 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -88,7 +87,7 @@ def _data_file(filename: str) -> str:
     return os.path.join(data_dir, filename)
 
 
-def _static_root() -> Optional[Path]:
+def _static_root() -> Path | None:
     root = os.getenv("STATIC_ROOT")
     if not root:
         return None
@@ -98,7 +97,7 @@ def _static_root() -> Optional[Path]:
     return None
 
 
-def _index_path(root: Path) -> Optional[Path]:
+def _index_path(root: Path) -> Path | None:
     index = root / "index.html"
     if index.is_file():
         return index
@@ -118,10 +117,10 @@ def _serve_index() -> HTMLResponse:
 class LeadReq(BaseModel):
     name: str = Field(min_length=1)
     email: EmailStr
-    phone: Optional[str] = Field(default=None, pattern=r"^\+?[0-9]{10,15}$")
-    vehicle_type: Optional[str] = None
-    price: Optional[float] = None
-    affiliate: Optional[str] = None
+    phone: str | None = Field(default=None, pattern=r"^\+?[0-9]{10,15}$")
+    vehicle_type: str | None = None
+    price: float | None = None
+    affiliate: str | None = None
 
 
 class LeadResp(BaseModel):
@@ -146,11 +145,11 @@ def create_lead(lead: LeadReq):
 
 class TrackReq(BaseModel):
     affiliate: str = Field(min_length=1)
-    utm_source: Optional[str] = None
-    utm_medium: Optional[str] = None
-    utm_campaign: Optional[str] = None
-    utm_term: Optional[str] = None
-    utm_content: Optional[str] = None
+    utm_source: str | None = None
+    utm_medium: str | None = None
+    utm_campaign: str | None = None
+    utm_term: str | None = None
+    utm_content: str | None = None
 
 
 class TrackResp(BaseModel):
