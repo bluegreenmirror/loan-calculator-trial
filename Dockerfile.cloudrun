@@ -8,7 +8,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir fastapi email-validator uvicorn[standard]
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && mv ~/.local/bin/uv /usr/local/bin/uv \
+    && rm -rf ~/.local \
+    && apt-get purge -y --auto-remove curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN uv pip install --system fastapi email-validator uvicorn[standard]
 
 COPY api/app.py ./app.py
 COPY web/dist/ ./static/

@@ -1,5 +1,8 @@
 SHELL := /bin/bash
-VENV_PREFIX = .venv/bin/
+UV ?= uv
+UV_ENV = UV_PROJECT_ENVIRONMENT=.venv
+UV_RUN = $(UV_ENV) $(UV) run
+UV_PIP = $(UV_ENV) $(UV) pip
 
 # Default project name for docker-compose when not provided by environment.
 # Ensures container_name templates like "${PROJECT_NAME}-caddy" are valid.
@@ -11,27 +14,27 @@ DOCKER_ENV_FLAG := $(if $(ENV_FILE),--env-file $(ENV_FILE),)
 COMPOSE_DEV := docker compose --profile dev
 
 .PHONY: lint format format-md lint-python lint-yaml lint-md lint-docker lint-caddy format-caddy test verify build-dev build-release prod-validate release-tag rollback validate-local validate-prod
-setup-dev: ## Create venv and install dev deps
-	python3 -m venv .venv
-	.venv/bin/pip install -r requirements-dev.txt
+setup-dev: ## Create venv and install dev deps using uv
+	$(UV) venv .venv
+	$(UV_PIP) install --requirements requirements-dev.txt
 
 lint: lint-python lint-yaml lint-md lint-caddy ## Run all linters
 
 format: format-caddy format-md ## Auto-format Python and Markdown
-	$(VENV_PREFIX)black api
+	$(UV_RUN) black api
 
 format-md: ## Auto-format Markdown files
-	$(VENV_PREFIX)mdformat README.md docs || true
+	$(UV_RUN) mdformat README.md docs || true
 
 lint-python: ## Ruff + Black check
-	$(VENV_PREFIX)ruff check api
-	$(VENV_PREFIX)black --check api
+	$(UV_RUN) ruff check api
+	$(UV_RUN) black --check api
 
 lint-yaml: ## yamllint
-	$(VENV_PREFIX)yamllint -s .
+	$(UV_RUN) yamllint -s .
 
 lint-md: ## mdformat --check
-	$(VENV_PREFIX)mdformat --check README.md docs
+	$(UV_RUN) mdformat --check README.md docs
 
 lint-docker: ## Build lint image which runs checks at build-time
 	$(COMPOSE_DEV) build lint
@@ -50,12 +53,12 @@ format-caddy: ## Format Caddyfile
 
 test: ## Run unit and integration tests
 	@if command -v docker >/dev/null 2>&1; then \
-		trap '$(COMPOSE_DEV) down' EXIT; \
-		$(COMPOSE_DEV) up -d; \
-		$(VENV_PREFIX)pytest; \
+	trap '$(COMPOSE_DEV) down' EXIT; \
+	$(COMPOSE_DEV) up -d; \
+	$(UV_RUN) pytest; \
 	else \
-		echo "Docker is not available; running pytest without containers."; \
-		$(VENV_PREFIX)pytest; \
+	echo "Docker is not available; running pytest without containers."; \
+	$(UV_RUN) pytest; \
 	fi
 
 verify: lint test ## Lint and run tests

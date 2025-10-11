@@ -13,12 +13,12 @@ We welcome contributions from developers, product thinkers, and automation agent
    ```bash
    cp .env.example .env
    ```
-1. Set up Python venv and development tools (one-time):
+1. Install [`uv`](https://github.com/astral-sh/uv) and set up the virtual environment (one-time):
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements-dev.txt
-   pre-commit install
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   uv venv
+   uv pip install --requirements requirements-dev.txt
+   uv run pre-commit install
    ```
 1. Run the stack:
    ```bash

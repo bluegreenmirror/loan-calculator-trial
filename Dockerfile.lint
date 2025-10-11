@@ -1,15 +1,18 @@
 FROM python:3.12-slim AS lint
-
-ENV PIP_NO_CACHE_DIR=1
 WORKDIR /src
 
 # Install system deps for yamllint if needed (none heavy) and git for some tools
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     ca-certificates \
+    curl \
+  && curl -LsSf https://astral.sh/uv/install.sh | sh \
+  && mv ~/.local/bin/uv /usr/local/bin/uv \
+  && rm -rf ~/.local \
+  && apt-get purge -y --auto-remove curl \
   && rm -rf /var/lib/apt/lists/*
 
 # Install linters/formatters (Python-based to avoid Node runtime)
-RUN pip install --no-cache-dir \
+RUN uv pip install --system \
     black==24.8.* \
     ruff==0.6.* \
     yamllint==1.35.* \

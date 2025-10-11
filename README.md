@@ -27,9 +27,9 @@ cd loan-calculator-internal
 cp .env.example .env   # no secrets; keep TLS vars empty for dev
 
 # One-time Python toolchain (venv) for lint/tests
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv venv
+uv pip install --requirements requirements-dev.txt
 
 # Bring up local stack and validate via edge proxy
 make validate-local     # uses Docker; serves http://localhost
@@ -158,7 +158,7 @@ required to run `make test` (or the broader `make verify`) before committing or 
 For fast, hermetic checks (no Docker), run the commands below:
 
 ```bash
-pip install -r requirements-dev.txt
+uv pip install --requirements requirements-dev.txt
 make test      # required before committing or opening a PR
 make verify    # optional superset with lint + tests
 ```
@@ -186,16 +186,16 @@ pytest -k 'not external'
 
   ```bash
   # One-time setup (in repo root)
-  python3 -m venv .venv
-  source .venv/bin/activate
-  pip install -r requirements-dev.txt
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  uv venv
+  uv pip install --requirements requirements-dev.txt
 
   # Install git hooks
-  pre-commit install
+  uv run pre-commit install
 
   # Check everything
   make lint
-  pre-commit run --all-files
+  uv run pre-commit run --all-files
 
   # Auto-format Python and Markdown
   make format
@@ -203,7 +203,8 @@ pytest -k 'not external'
 
 - Notes:
 
-  - The Makefile runs tools from `.venv/bin/...`. Ensure you installed into `.venv` as above. If you open a new shell, re-activate with `source .venv/bin/activate`.
+  - Ensure the `uv` binary is on your `PATH` (the install script drops it in `~/.local/bin`).
+  - Make targets call `uv run`, so you do not need to activate the virtual environment manually. Re-run `uv pip install --requirements requirements-dev.txt` whenever dependencies change.
 
 - Build-time check via Docker:
 

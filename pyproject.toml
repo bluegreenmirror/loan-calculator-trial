@@ -1,3 +1,10 @@
+[project]
+name = "loan-calculator-internal"
+version = "0.0.0"
+description = "Internal tooling for the vehicle loan calculator"
+requires-python = ">=3.12"
+dependencies = []
+
 [tool.black]
 line-length = 88
 target-version = ["py39"]

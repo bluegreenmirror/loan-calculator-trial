@@ -2,19 +2,23 @@
 set -euo pipefail
 
 echo "==> Python linters and tests"
-if [ -d .venv ]; then
-  VENV_ACTIVATE=". .venv/bin/activate"
+if command -v uv >/dev/null 2>&1; then
+  PY_PREFIX="UV_PROJECT_ENVIRONMENT=.venv uv run"
 else
-  VENV_ACTIVATE=":"
+  if [ -d .venv ]; then
+    PY_PREFIX=". .venv/bin/activate &&"
+  else
+    PY_PREFIX=""
+  fi
 fi
 
 run(){ echo "+ $*"; eval "$*"; }
 
-run "$VENV_ACTIVATE; ruff check api"
-run "$VENV_ACTIVATE; black --check api"
-run "$VENV_ACTIVATE; yamllint -s ."
-run "$VENV_ACTIVATE; mdformat --check README.md docs"
-run "$VENV_ACTIVATE; pytest -q"
+run "${PY_PREFIX:+$PY_PREFIX }ruff check api"
+run "${PY_PREFIX:+$PY_PREFIX }black --check api"
+run "${PY_PREFIX:+$PY_PREFIX }yamllint -s ."
+run "${PY_PREFIX:+$PY_PREFIX }mdformat --check README.md docs"
+run "${PY_PREFIX:+$PY_PREFIX }pytest -q"
 
 echo "==> Caddyfile validation (best-effort)"
 if command -v docker >/dev/null 2>&1; then
