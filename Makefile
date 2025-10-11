@@ -25,7 +25,7 @@ format: format-caddy format-md ## Auto-format Python and Markdown
 	$(UV_RUN) black api
 
 format-md: ## Auto-format Markdown files
-	$(UV_RUN) mdformat README.md docs || true
+	$(UV_RUN) mdformat README.md docs sprints || true
 
 lint-python: ## Ruff + Black check
 	$(UV_RUN) ruff check api
@@ -35,7 +35,7 @@ lint-yaml: ## yamllint
 	$(UV_RUN) yamllint -s .
 
 lint-md: ## mdformat --check
-	$(UV_RUN) mdformat --check README.md docs
+	$(UV_RUN) mdformat --check README.md docs sprints
 
 lint-docker: ## Build lint image which runs checks at build-time
 	$(COMPOSE_DEV) build lint

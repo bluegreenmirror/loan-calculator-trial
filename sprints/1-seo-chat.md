@@ -1,4 +1,4 @@
-# Sprint sprint-1: SEO & Chat Agent Optimization
+# Sprint 1: SEO & Chat Agent Optimization
 
 ## Goal
 
@@ -14,18 +14,19 @@
 
 ## Tasks Overview
 
-The authoritative sprint backlog now lives in `docs/sprint-seo-chat.json`. That file tracks task identifiers, status, and notes.
+The authoritative sprint backlog now lives in `sprints/sprint-1.json`. That file tracks task identifiers, status, and notes.
 
-| Ticket | Task                                              | Status      | Notes                                                                          |
-| ------ | ------------------------------------------------- | ----------- | ------------------------------------------------------------------------------ |
-| s1-t1  | Refresh `<head>` metadata                         | Complete    | Highlights the primary calculator keywords and refreshed previews.             |
-| s1-t2  | Add SEO-focused content sections                  | Complete    | Vehicle-specific sections cover auto, RV, motorcycle, and jet ski calculators. |
-| s1-t3  | Publish FAQPage JSON-LD                           | Complete    | Chat-oriented answers exposed via structured data.                             |
-| s1-t4  | Update supporting styles                          | Complete    | Ensures the expanded sections remain accessible and on brand.                  |
-| s1-t5  | Document risks, mitigations, and validation steps | In progress | Draft documentation outstanding.                                               |
+| Ticket | Task                                              | Status   | Notes                                                                          |
+| ------ | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| s1-t1  | Refresh `<head>` metadata                         | Complete | Highlights the primary calculator keywords and refreshed previews.             |
+| s1-t2  | Add SEO-focused content sections                  | Complete | Vehicle-specific sections cover auto, RV, motorcycle, and jet ski calculators. |
+| s1-t3  | Publish FAQPage JSON-LD                           | Complete | Chat-oriented answers exposed via structured data.                             |
+| s1-t4  | Update supporting styles                          | Complete | Ensures the expanded sections remain accessible and on brand.                  |
+| s1-t5  | Document risks, mitigations, and validation steps | Todo     | No draft exists; assign an owner to capture mitigations.                       |
 
 ## Guidelines
 
+- Shared sprint guardrails are documented in `sprints.json`.
 - Cap each sprint at ten tickets; create a new sprint once additional work would exceed the cap.
 - Keep tickets small, atomic, and as independent as possible to enable smooth sequencing and ownership.
 
@@ -34,7 +35,7 @@ The authoritative sprint backlog now lives in `docs/sprint-seo-chat.json`. That 
 - Updated landing page metadata now highlights auto, RV, motorcycle, and jet ski loan calculator keywords alongside refreshed social previews. (`web/dist/index.html`)
 - Vehicle-specific SEO content, chat agent briefing notes, and FAQ entries are live on the landing page to support organic and conversational discovery. (`web/dist/index.html`)
 - FAQPage JSON-LD answers and supporting styles for the new sections ship with the build, ensuring structured data validation and consistent presentation. (`web/dist/index.html`, `web/dist/style.css`)
-- Dedicated documentation capturing risks, mitigations, and validation steps still needs to be authored, so task s1-t5 remains outstanding.
+- Dedicated documentation capturing risks, mitigations, and validation steps still needs to be authored, putting the sprint at risk until an owner is assigned.
 
 ## Chat Agent Enablement
 

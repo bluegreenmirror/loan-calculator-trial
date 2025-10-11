@@ -1,0 +1,52 @@
+{
+  "guidelines": {
+    "maxTicketsPerSprint": 10,
+    "taskSizing": "Tasks should remain small, atomic, and as independent as possible.",
+    "scaling": "Create an additional sprint when a backlog would exceed ten tickets."
+  },
+  "sprints": [
+    {
+      "sequence": 1,
+      "id": "seo-chat-agent-optimization",
+      "ticket": "sprint-1",
+      "name": "Sprint 1: SEO & Chat Agent Optimization",
+      "goal": "Elevate organic visibility for targeted vehicle loan calculator queries while supplying structured content for chat agents.",
+      "plan": {
+        "acceptanceCriteria": [
+          "Updated landing page metadata and copy references the targeted vehicle loan calculator keywords naturally.",
+          "Each vehicle type has a dedicated content section with plain-language explanations and comparison points.",
+          "Structured data (FAQ) published in the HTML head or body validates via common schema checkers.",
+          "Internal documentation captures the workstream along with risk assessment and validation steps."
+        ],
+        "themes": [
+          "Refresh on-page metadata to emphasize priority loan calculator keywords.",
+          "Expand and organize vehicle-specific content sections for SEO and chat agent clarity.",
+          "Ship FAQPage JSON-LD with supporting styles and author the mitigation playbook."
+        ]
+      },
+      "details": "sprints/sprint-1.json"
+    },
+    {
+      "sequence": 2,
+      "id": "prd-gap-closure",
+      "ticket": "sprint-2",
+      "name": "Sprint 2: PRD Compliance Hardening",
+      "goal": "Close the remaining MVP gaps so the vehicle loan calculator satisfies every base PRD requirement.",
+      "plan": {
+        "acceptanceCriteria": [
+          "Calculator UI exposes price, down payment, trade-in value, fees, tax rate, APR, and term inputs with validation.",
+          "Frontend consumes the /api/quote endpoint so business logic lives in one place and honors trade-in and tax fields.",
+          "Affiliate and UTM metadata are persisted for both click tracking and submitted leads.",
+          "Automated tests cover the new quote, lead, and tracking scenarios."
+        ],
+        "themes": [
+          "Extend the calculator UI to cover all PRD-mandated financial inputs.",
+          "Shift calculation responsibility to the /api/quote endpoint for consistency.",
+          "Persist affiliate attribution and UTM metadata across tracking and leads.",
+          "Backfill automated coverage for the new quote, tracking, and lead behaviors."
+        ]
+      },
+      "details": "sprints/sprint-2.json"
+    }
+  ]
+}

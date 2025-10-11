@@ -1,0 +1,47 @@
+{
+  "tasks": [
+    {
+      "id": "ui-tradein-tax",
+      "ticket": "s2-t1",
+      "name": "Add trade-in and tax rate inputs to the calculator",
+      "status": "todo",
+      "notes": "Surface the remaining PRD inputs with inline validation and formatting."
+    },
+    {
+      "id": "frontend-api-quote",
+      "ticket": "s2-t2",
+      "name": "Call /api/quote from the frontend calculator",
+      "status": "todo",
+      "notes": "Send the full payload (price, fees, down, trade-in, tax, APR, term) and render the API response."
+    },
+    {
+      "id": "track-utms",
+      "ticket": "s2-t3",
+      "name": "Persist UTM parameters when tracking affiliate clicks",
+      "status": "todo",
+      "notes": "Include utm_* values in /api/track requests and store them alongside the affiliate ID."
+    },
+    {
+      "id": "lead-metadata",
+      "ticket": "s2-t4",
+      "name": "Attach affiliate and UTM metadata to lead submissions",
+      "status": "todo",
+      "notes": "Send stored affiliate and UTM values with /api/leads and persist them server-side."
+    },
+    {
+      "id": "api-test-coverage",
+      "ticket": "s2-t5",
+      "name": "Extend API tests for quote, track, and lead flows",
+      "status": "todo",
+      "notes": "Add pytest coverage for trade-in/tax math plus metadata persistence."
+    }
+  ],
+  "progress": {
+    "status": "not_started",
+    "completedTasks": 0,
+    "totalTasks": 5,
+    "percentComplete": 0,
+    "summary": [],
+    "outstanding": []
+  }
+}

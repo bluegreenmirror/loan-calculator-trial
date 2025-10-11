@@ -1,0 +1,57 @@
+{
+  "tasks": [
+    {
+      "id": "metadata-refresh",
+      "ticket": "s1-t1",
+      "name": "Refresh <head> metadata",
+      "status": "done",
+      "notes": "Primary calculator keywords and social previews updated."
+    },
+    {
+      "id": "vehicle-content",
+      "ticket": "s1-t2",
+      "name": "Add SEO-focused vehicle content sections",
+      "status": "done",
+      "notes": "Auto, RV, motorcycle, and jet ski sections published with keyword-aligned copy."
+    },
+    {
+      "id": "faq-jsonld",
+      "ticket": "s1-t3",
+      "name": "Publish FAQPage JSON-LD",
+      "status": "done",
+      "notes": "Structured data exposes canonical answers for chat agents."
+    },
+    {
+      "id": "styles-update",
+      "ticket": "s1-t4",
+      "name": "Update supporting styles",
+      "status": "done",
+      "notes": "Ensures accessibility and brand alignment for the expanded sections."
+    },
+    {
+      "id": "documentation",
+      "ticket": "s1-t5",
+      "name": "Document risks, mitigations, and validation steps",
+      "status": "todo",
+      "notes": "No draft exists yet; assign a writer to capture the mitigation playbook."
+    }
+  ],
+  "progress": {
+    "status": "at_risk",
+    "completedTasks": 4,
+    "totalTasks": 5,
+    "percentComplete": 80,
+    "summary": [
+      "Landing page metadata highlights targeted keywords alongside refreshed previews.",
+      "Vehicle-specific SEO content, chat agent notes, and FAQ entries are live on the landing page.",
+      "FAQPage JSON-LD and related styles are shipping with the build for validation and presentation consistency."
+    ],
+    "outstanding": [
+      {
+        "taskId": "documentation",
+        "ticket": "s1-t5",
+        "description": "Capture the risk/mitigation/validation plan in sprints/1-seo-chat.md to close out the sprint."
+      }
+    ]
+  }
+}

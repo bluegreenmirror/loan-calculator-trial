@@ -45,3 +45,4 @@ docker-compose.override.yml
 uvicorn.log
 uvicorn.pid
 uv.pid
+uv.lock
