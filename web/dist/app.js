@@ -1,15 +1,37 @@
+const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
 const params = new URLSearchParams(window.location.search);
 const aff = params.get('aff');
-['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(k => {
-  const v = params.get(k);
-  if (v) localStorage.setItem(k, v);
+UTM_KEYS.forEach((key) => {
+  const value = params.get(key);
+  if (value) {
+    localStorage.setItem(key, value);
+  }
 });
+
+function buildAttributionPayload() {
+  const payload = {};
+  const storedAffiliate = localStorage.getItem('affiliate');
+  if (storedAffiliate) {
+    payload.affiliate = storedAffiliate;
+  }
+  UTM_KEYS.forEach((key) => {
+    const value = localStorage.getItem(key);
+    if (value) {
+      payload[key] = value;
+    }
+  });
+  return payload;
+}
+
 if (aff) {
   localStorage.setItem('affiliate', aff);
+  const trackPayload = buildAttributionPayload();
+  trackPayload.affiliate = aff;
   fetch('/api/track', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ affiliate: aff })
+    body: JSON.stringify(trackPayload)
   });
 }
 
@@ -32,12 +54,6 @@ function applyPreset(type) {
 document.getElementById('vehicle').addEventListener('change', (e) => {
   applyPreset(e.target.value);
 });
-
-function pmnt(principal, aprPct, n) {
-  const r = (aprPct/100)/12;
-  if (r === 0) return principal / n;
-  return principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
-}
 
 function fmt(n){
   return n.toLocaleString(undefined, {style:'currency', currency:'USD'})
@@ -156,74 +172,112 @@ function updateChart(principal, interest) {
   canvas.classList.add('bounce');
 }
 
-function calc(){
+async function calc(){
   const calcBtn = document.getElementById('calc');
   const calcStatus = document.getElementById('calc-status');
-  
-  // Get values
-  const price = +document.getElementById('price').value || 0;
-  const term = +document.getElementById('term').value || 1;
-  const termUnit = document.querySelector('input[name="term-unit"]:checked').value;
-  const apr = +document.getElementById('apr').value || 0;
-  const down = +document.getElementById('down').value || 0;
-  const fees = +document.getElementById('fees').value || 0;
 
-  // Convert term to months if needed
+  const price = Number(document.getElementById('price').value) || 0;
+  const term = Number(document.getElementById('term').value) || 1;
+  const termUnit = document.querySelector('input[name="term-unit"]:checked').value;
+  const apr = Number(document.getElementById('apr').value) || 0;
+  const down = Number(document.getElementById('down').value) || 0;
+  const fees = Number(document.getElementById('fees').value) || 0;
+  const trade = Number(document.getElementById('trade').value) || 0;
+  const tax = Number(document.getElementById('tax').value) || 0;
+
   const termMonths = termUnit === 'years' ? term * 12 : term;
 
-  // Show loading state
   calcBtn.disabled = true;
   calcBtn.textContent = 'Calculating...';
   calcStatus.className = 'calculation-status';
   calcStatus.textContent = '';
 
-  // Simulate calculation delay for better UX
-  setTimeout(() => {
-    try {
-      if (price <= 0) {
-        throw new Error('Vehicle loan amount must be greater than 0');
-      }
-      
-      if (apr < 0 || apr > 100) {
-        throw new Error('Interest rate must be between 0 and 100');
-      }
-      
-      if (termMonths <= 0) {
-        throw new Error('Vehicle loan term must be greater than 0');
-      }
-
-      const principal = Math.max(price + fees - down, 0);
-      const monthly = pmnt(principal, apr, termMonths);
-      const total = monthly * termMonths;
-      const interest = Math.max(total - principal, 0);
-
-      animateNumber(document.getElementById('fin'), principal);
-      animateNumber(document.getElementById('pay'), monthly);
-      animateNumber(document.getElementById('int'), interest);
-      animateNumber(document.getElementById('tot'), total);
-      
-      updateChart(principal, interest);
-      
-      // Show success status
-      calcStatus.className = 'calculation-status show success';
-      calcStatus.textContent = 'Calculation completed successfully!';
-      
-    } catch (error) {
-      // Show error status
-      calcStatus.className = 'calculation-status show error';
-      calcStatus.textContent = error.message;
-      
-      // Reset results
-      animateNumber(document.getElementById('fin'), 0);
-      animateNumber(document.getElementById('pay'), 0);
-      animateNumber(document.getElementById('int'), 0);
-      animateNumber(document.getElementById('tot'), 0);
-    } finally {
-      // Reset button state
-      calcBtn.disabled = false;
-      calcBtn.textContent = 'Calculate';
+  try {
+    if (price <= 0) {
+      throw new Error('Vehicle loan amount must be greater than 0');
     }
-  }, 500);
+
+    if (apr < 0 || apr > 100) {
+      throw new Error('Interest rate must be between 0 and 100');
+    }
+
+    if (termMonths <= 0) {
+      throw new Error('Vehicle loan term must be greater than 0');
+    }
+
+    if (down < 0) {
+      throw new Error('Down payment cannot be negative');
+    }
+
+    if (fees < 0) {
+      throw new Error('Additional fees cannot be negative');
+    }
+
+    if (trade < 0) {
+      throw new Error('Trade-in value cannot be negative');
+    }
+
+    if (tax < 0 || tax > 100) {
+      throw new Error('Tax rate must be between 0 and 100');
+    }
+
+    const payload = {
+      vehicle_price: price,
+      down_payment: Math.max(down, 0),
+      apr,
+      term_months: termMonths,
+      tax_rate: tax / 100,
+      fees: Math.max(fees, 0),
+      trade_in_value: Math.max(trade, 0)
+    };
+
+    const response = await fetch('/api/quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    let result = null;
+    try {
+      result = await response.json();
+    } catch (err) {
+      console.error('Failed to parse quote response', err);
+    }
+
+    if (!response.ok || !result) {
+      let message = 'Failed to calculate quote. Please try again.';
+      if (result && result.detail) {
+        if (Array.isArray(result.detail)) {
+          message = result.detail.map((item) => item.msg).join('; ');
+        } else if (typeof result.detail === 'string') {
+          message = result.detail;
+        }
+      }
+      throw new Error(message);
+    }
+
+    animateNumber(document.getElementById('fin'), result.amount_financed);
+    animateNumber(document.getElementById('pay'), result.monthly_payment);
+    animateNumber(document.getElementById('int'), result.total_interest);
+    animateNumber(document.getElementById('tot'), result.total_cost);
+
+    updateChart(result.amount_financed, result.total_interest);
+
+    calcStatus.className = 'calculation-status show success';
+    calcStatus.textContent = 'Quote retrieved successfully from the server.';
+  } catch (error) {
+    console.error('Calculation error', error);
+    calcStatus.className = 'calculation-status show error';
+    calcStatus.textContent = error.message;
+
+    animateNumber(document.getElementById('fin'), 0);
+    animateNumber(document.getElementById('pay'), 0);
+    animateNumber(document.getElementById('int'), 0);
+    animateNumber(document.getElementById('tot'), 0);
+  } finally {
+    calcBtn.disabled = false;
+    calcBtn.textContent = 'Calculate';
+  }
 }
 
 function toggleExpandable(sectionId) {
@@ -270,9 +324,10 @@ async function handleLeadSubmission(e) {
       email: document.getElementById('lead-email').value,
       phone: document.getElementById('lead-phone').value || null,
       vehicle_type: document.getElementById('lead-vehicle').value,
-      price: parseFloat(document.getElementById('lead-price').value) || null,
-      affiliate: localStorage.getItem('affiliate') || null
+      price: parseFloat(document.getElementById('lead-price').value) || null
     };
+
+    Object.assign(formData, buildAttributionPayload());
     
     const response = await fetch('/api/leads', {
       method: 'POST',

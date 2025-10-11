@@ -5,11 +5,11 @@
 - Close the outstanding MVP gaps so the vehicle loan calculator implements every functional requirement from the base PRD.
 - Align frontend and backend behaviors so future presets or asset types can reuse a single source of truth.
 
-## Remaining PRD Gaps
+## PRD Gaps Addressed
 
-- The PRD calls for trade-in value and tax rate inputs alongside price, fees, down payment, APR, and term, but the current UI only exposes price, APR, term, down payment, and fees. 【F:docs/PRD.md†L23-L31】【F:web/dist/index.html†L33-L88】
-- `/api/quote` already supports trade-in and tax math, yet the frontend performs its own calculations and never invokes the API, so the shipped experience diverges from the documented contract. 【F:docs/PRD.md†L37-L49】【F:api/app.py†L35-L93】【F:web/dist/app.js†L55-L123】
-- Affiliate tracking must persist UTM parameters and affiliate IDs according to the PRD, but only the affiliate ID is posted today and UTMs are dropped. 【F:docs/PRD.md†L50-L63】【F:web/dist/app.js†L1-L53】【F:api/app.py†L111-L159】
+- Calculator UI now exposes trade-in value and tax rate inputs alongside price, down payment, fees, APR, and term. 【F:docs/PRD.md†L23-L31】【F:web/dist/index.html†L33-L110】
+- The frontend calls `/api/quote` so amount financed, payment, and interest reflect the server calculation that already handles trade-in value and tax rate. 【F:docs/PRD.md†L37-L49】【F:api/app.py†L35-L93】【F:web/dist/app.js†L124-L211】
+- Affiliate tracking and lead capture persist UTM metadata together with the affiliate identifier to align with the PRD. 【F:docs/PRD.md†L50-L63】【F:web/dist/app.js†L1-L115】【F:api/app.py†L111-L159】
 
 ## Acceptance Criteria
 
@@ -24,11 +24,11 @@ Detailed ticket tracking for this sprint lives in `sprints/sprint-2.json`.
 
 | Ticket | Task                                                  | Status | Notes                                                                                            |
 | ------ | ----------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
-| s2-t1  | Add trade-in and tax rate inputs to the calculator    | Todo   | Surface the remaining PRD inputs with inline validation and formatting.                          |
-| s2-t2  | Call `/api/quote` from the frontend calculator        | Todo   | Send the full payload (price, fees, down, trade-in, tax, APR, term) and render the API response. |
-| s2-t3  | Persist UTM parameters when tracking affiliate clicks | Todo   | Include `utm_*` values in `/api/track` requests and store them alongside the affiliate ID.       |
-| s2-t4  | Attach affiliate and UTM metadata to lead submissions | Todo   | Send stored affiliate and UTM values with `/api/leads` and persist them server-side.             |
-| s2-t5  | Extend API tests for quote, track, and lead flows     | Todo   | Add pytest coverage for trade-in/tax math plus metadata persistence.                             |
+| s2-t1  | Add trade-in and tax rate inputs to the calculator    | Complete | Trade-in value and tax rate fields are live with inline validation alongside existing inputs.     |
+| s2-t2  | Call `/api/quote` from the frontend calculator        | Complete | Calculator now uses `/api/quote` and renders the server totals for financed amount and payments. |
+| s2-t3  | Persist UTM parameters when tracking affiliate clicks | Complete | `/api/track` receives affiliate plus stored UTM parameters for every captured click.             |
+| s2-t4  | Attach affiliate and UTM metadata to lead submissions | Complete | Lead submissions include affiliate and UTM metadata that persist in `leads.json`.                 |
+| s2-t5  | Extend API tests for quote, track, and lead flows     | Complete | Pytest coverage verifies trade-in/tax math plus attribution persistence for leads and tracking.  |
 
 ## Dependencies & Risks
 

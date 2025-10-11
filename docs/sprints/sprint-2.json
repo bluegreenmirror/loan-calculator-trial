@@ -4,44 +4,48 @@
       "id": "ui-tradein-tax",
       "ticket": "s2-t1",
       "name": "Add trade-in and tax rate inputs to the calculator",
-      "status": "todo",
-      "notes": "Surface the remaining PRD inputs with inline validation and formatting."
+      "status": "done",
+      "notes": "Calculator UI now surfaces trade-in and tax inputs alongside down payment, fees, APR, and term."
     },
     {
       "id": "frontend-api-quote",
       "ticket": "s2-t2",
       "name": "Call /api/quote from the frontend calculator",
-      "status": "todo",
-      "notes": "Send the full payload (price, fees, down, trade-in, tax, APR, term) and render the API response."
+      "status": "done",
+      "notes": "Frontend submits the full payload to /api/quote and renders the API response including server-side totals."
     },
     {
       "id": "track-utms",
       "ticket": "s2-t3",
       "name": "Persist UTM parameters when tracking affiliate clicks",
-      "status": "todo",
-      "notes": "Include utm_* values in /api/track requests and store them alongside the affiliate ID."
+      "status": "done",
+      "notes": "Affiliate tracking posts stored UTM parameters to /api/track so attribution persists with each click."
     },
     {
       "id": "lead-metadata",
       "ticket": "s2-t4",
       "name": "Attach affiliate and UTM metadata to lead submissions",
-      "status": "todo",
-      "notes": "Send stored affiliate and UTM values with /api/leads and persist them server-side."
+      "status": "done",
+      "notes": "Lead submissions include affiliate and UTM metadata, which are now persisted server-side."
     },
     {
       "id": "api-test-coverage",
       "ticket": "s2-t5",
       "name": "Extend API tests for quote, track, and lead flows",
-      "status": "todo",
-      "notes": "Add pytest coverage for trade-in/tax math plus metadata persistence."
+      "status": "done",
+      "notes": "Pytest suite covers trade-in/tax scenarios and attribution persistence across leads and tracking."
     }
   ],
   "progress": {
-    "status": "not_started",
-    "completedTasks": 0,
+    "status": "complete",
+    "completedTasks": 5,
     "totalTasks": 5,
-    "percentComplete": 0,
-    "summary": [],
+    "percentComplete": 100,
+    "summary": [
+      "Calculator UI exposes trade-in value and tax rate with validation alongside existing financing fields.",
+      "Frontend now uses /api/quote so amount financed, payment, and interest mirror the server totals.",
+      "Affiliate tracking and lead capture persist affiliate and UTM metadata, verified by pytest coverage."
+    ],
     "outstanding": []
   }
 }

@@ -22,7 +22,7 @@ The authoritative sprint backlog now lives in `sprints/sprint-1.json`. That file
 | s1-t2  | Add SEO-focused content sections                  | Complete | Vehicle-specific sections cover auto, RV, motorcycle, and jet ski calculators. |
 | s1-t3  | Publish FAQPage JSON-LD                           | Complete | Chat-oriented answers exposed via structured data.                             |
 | s1-t4  | Update supporting styles                          | Complete | Ensures the expanded sections remain accessible and on brand.                  |
-| s1-t5  | Document risks, mitigations, and validation steps | Todo     | No draft exists; assign an owner to capture mitigations.                       |
+| s1-t5  | Document risks, mitigations, and validation steps | In Progress | Draft outline captures risk scenarios, mitigation owners, and validation steps; review pending. |
 
 ## Guidelines
 
@@ -35,7 +35,7 @@ The authoritative sprint backlog now lives in `sprints/sprint-1.json`. That file
 - Updated landing page metadata now highlights auto, RV, motorcycle, and jet ski loan calculator keywords alongside refreshed social previews. (`web/dist/index.html`)
 - Vehicle-specific SEO content, chat agent briefing notes, and FAQ entries are live on the landing page to support organic and conversational discovery. (`web/dist/index.html`)
 - FAQPage JSON-LD answers and supporting styles for the new sections ship with the build, ensuring structured data validation and consistent presentation. (`web/dist/index.html`, `web/dist/style.css`)
-- Dedicated documentation capturing risks, mitigations, and validation steps still needs to be authored, putting the sprint at risk until an owner is assigned.
+- Dedicated documentation capturing risks, mitigations, and validation steps is in drafting, with feedback and publication pending before the sprint can close.
 
 ## Chat Agent Enablement
 

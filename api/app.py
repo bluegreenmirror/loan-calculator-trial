@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -121,6 +121,11 @@ class LeadReq(BaseModel):
     vehicle_type: str | None = None
     price: float | None = None
     affiliate: str | None = None
+    utm_source: str | None = None
+    utm_medium: str | None = None
+    utm_campaign: str | None = None
+    utm_term: str | None = None
+    utm_content: str | None = None
 
 
 class LeadResp(BaseModel):
@@ -130,8 +135,8 @@ class LeadResp(BaseModel):
 @app.post("/api/leads", response_model=LeadResp)
 def create_lead(lead: LeadReq):
     leads_file = _data_file("leads.json")
-    lead_entry = lead.model_dump()
-    lead_entry["timestamp"] = datetime.utcnow().isoformat()
+    lead_entry = lead.model_dump(exclude_none=True)
+    lead_entry["timestamp"] = datetime.now(UTC).isoformat()
     if os.path.exists(leads_file):
         with open(leads_file) as f:
             data = json.load(f)
@@ -160,7 +165,7 @@ class TrackResp(BaseModel):
 def track_click(track: TrackReq):
     track_file = _data_file("tracks.json")
     entry = track.model_dump(exclude_none=True)
-    entry["timestamp"] = datetime.utcnow().isoformat()
+    entry["timestamp"] = datetime.now(UTC).isoformat()
     if os.path.exists(track_file):
         with open(track_file) as f:
             data = json.load(f)

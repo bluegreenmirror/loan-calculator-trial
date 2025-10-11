@@ -81,6 +81,32 @@ def test_lead_multiple_appends(tmp_path, monkeypatch):
     assert data[1]["email"] == "a2@example.com"
 
 
+def test_lead_persists_affiliate_and_utms(tmp_path, monkeypatch):
+    """Affiliate and UTM metadata should be persisted when supplied."""
+    monkeypatch.setenv("PERSIST_DIR", str(tmp_path))
+    payload = {
+        "name": "Attribution Test",
+        "email": "attr@example.com",
+        "phone": "+12345678901",
+        "affiliate": "aff123",
+        "utm_source": "newsletter",
+        "utm_medium": "email",
+        "utm_campaign": "spring-launch",
+        "utm_term": "auto-loans",
+        "utm_content": "cta-button",
+    }
+    resp = client.post("/api/leads", json=payload)
+    assert resp.status_code == 200
+    data = json.loads((tmp_path / "leads.json").read_text())
+    lead = data[0]
+    assert lead["affiliate"] == "aff123"
+    assert lead["utm_source"] == "newsletter"
+    assert lead["utm_medium"] == "email"
+    assert lead["utm_campaign"] == "spring-launch"
+    assert lead["utm_term"] == "auto-loans"
+    assert lead["utm_content"] == "cta-button"
+
+
 def test_lead_corrupt_file_returns_500_and_unmodified(tmp_path, monkeypatch):
     """If leads.json is corrupt, API should return 500 and not overwrite it."""
     monkeypatch.setenv("PERSIST_DIR", str(tmp_path))

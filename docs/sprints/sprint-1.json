@@ -32,8 +32,8 @@
       "id": "documentation",
       "ticket": "s1-t5",
       "name": "Document risks, mitigations, and validation steps",
-      "status": "todo",
-      "notes": "No draft exists yet; assign a writer to capture the mitigation playbook."
+      "status": "in_progress",
+      "notes": "Outline drafted covering risk scenarios, mitigation owners, and validation steps; review pending."
     }
   ],
   "progress": {
@@ -44,13 +44,14 @@
     "summary": [
       "Landing page metadata highlights targeted keywords alongside refreshed previews.",
       "Vehicle-specific SEO content, chat agent notes, and FAQ entries are live on the landing page.",
-      "FAQPage JSON-LD and related styles are shipping with the build for validation and presentation consistency."
+      "FAQPage JSON-LD and related styles are shipping with the build for validation and presentation consistency.",
+      "Risk, mitigation, and validation documentation draft is underway and awaiting feedback before publication."
     ],
     "outstanding": [
       {
         "taskId": "documentation",
         "ticket": "s1-t5",
-        "description": "Capture the risk/mitigation/validation plan in sprints/1-seo-chat.md to close out the sprint."
+        "description": "Finalize and publish the documentation draft in sprints/1-seo-chat.md after team review."
       }
     ]
   }
