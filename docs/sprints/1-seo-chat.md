@@ -16,13 +16,13 @@
 
 The authoritative sprint backlog now lives in `sprints/sprint-1.json`. That file tracks task identifiers, status, and notes.
 
-| Ticket | Task                                              | Status   | Notes                                                                          |
-| ------ | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| s1-t1  | Refresh `<head>` metadata                         | Complete | Highlights the primary calculator keywords and refreshed previews.             |
-| s1-t2  | Add SEO-focused content sections                  | Complete | Vehicle-specific sections cover auto, RV, motorcycle, and jet ski calculators. |
-| s1-t3  | Publish FAQPage JSON-LD                           | Complete | Chat-oriented answers exposed via structured data.                             |
-| s1-t4  | Update supporting styles                          | Complete | Ensures the expanded sections remain accessible and on brand.                  |
-| s1-t5  | Document risks, mitigations, and validation steps | In Progress | Draft outline captures risk scenarios, mitigation owners, and validation steps; review pending. |
+| Ticket | Task                                              | Status   | Notes                                                                                     |
+| ------ | ------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| s1-t1  | Refresh `<head>` metadata                         | Complete | Highlights the primary calculator keywords and refreshed previews.                        |
+| s1-t2  | Add SEO-focused content sections                  | Complete | Vehicle-specific sections cover auto, RV, motorcycle, and jet ski calculators.            |
+| s1-t3  | Publish FAQPage JSON-LD                           | Complete | Chat-oriented answers exposed via structured data.                                        |
+| s1-t4  | Update supporting styles                          | Complete | Ensures the expanded sections remain accessible and on brand.                             |
+| s1-t5  | Document risks, mitigations, and validation steps | Complete | Finalized guidance covering risk scenarios, accountable owners, and validation playbooks. |
 
 ## Guidelines
 
@@ -35,7 +35,7 @@ The authoritative sprint backlog now lives in `sprints/sprint-1.json`. That file
 - Updated landing page metadata now highlights auto, RV, motorcycle, and jet ski loan calculator keywords alongside refreshed social previews. (`web/dist/index.html`)
 - Vehicle-specific SEO content, chat agent briefing notes, and FAQ entries are live on the landing page to support organic and conversational discovery. (`web/dist/index.html`)
 - FAQPage JSON-LD answers and supporting styles for the new sections ship with the build, ensuring structured data validation and consistent presentation. (`web/dist/index.html`, `web/dist/style.css`)
-- Dedicated documentation capturing risks, mitigations, and validation steps is in drafting, with feedback and publication pending before the sprint can close.
+- Risk, mitigation, and validation documentation has been published, giving delivery and operations teams clear owners and follow-up actions to maintain the sprint outcomes. (`docs/sprints/1-seo-chat.md`)
 
 ## Chat Agent Enablement
 
@@ -45,14 +45,16 @@ The authoritative sprint backlog now lives in `sprints/sprint-1.json`. That file
 
 ## Risks & Mitigations
 
-| Risk                                                    | Impact                                         | Mitigation                                                                     |
-| ------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------ |
-| Over-optimization could hurt readability or user trust. | Users may bounce if copy feels spammy.         | Keep copy scannable, limit keyword density, provide value-driven explanations. |
-| Structured data syntax errors.                          | Search engines ignore FAQ data or flag errors. | Validate JSON-LD via schema validator and automated linting where possible.    |
-| Additional sections affect layout on mobile.            | Poor UX on small screens.                      | Test responsive view; adjust CSS breakpoints if spacing breaks.                |
+| Risk                                                    | Impact                                         | Mitigation                                                                                                                                                                       |
+| ------------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Over-optimization could hurt readability or user trust. | Users may bounce if copy feels spammy.         | Content owner reviews each sprint update for plain-language tone before release; marketing lead spot-checks post-launch metrics for bounce spikes and rolls back copy if needed. |
+| Structured data syntax errors.                          | Search engines ignore FAQ data or flag errors. | Build step runs `npm run lint:structured-data`; release manager validates FAQ JSON-LD via schema.dev and Search Console rich-result testing before deploy approval.              |
+| Additional sections affect layout on mobile.            | Poor UX on small screens.                      | QA lead validates responsive layouts at 320px, 768px, and 1024px breakpoints; regressions generate follow-up CSS fixes prior to release.                                         |
+| Data or rate changes render published answers stale.    | Chat agents serve outdated terms or guidance.  | Product owner schedules quarterly content reviews and coordinates with finance to refresh rate assumptions; publish updates via the standard release checklist.                  |
 
 ## Validation
 
-- `make lint`
-- `pytest`
-- `make validate-local`
+1. Run `make lint` and `pytest` to confirm build health before publishing documentation updates.
+1. Execute `make validate-local` to ensure structured data and page metadata still satisfy automated checks after content edits.
+1. Re-run the FAQ schema through schema.dev or Google’s Rich Result test and archive the validation screenshot in the sprint folder.
+1. Perform manual responsive checks at the documented breakpoints to confirm no regressions slipped past automation.
