@@ -16,9 +16,9 @@ For local development, you can use the `dev` profile in the `docker-compose.yml`
 
 To run the application locally, you can use the following `make` commands:
 
-*   `make verify`: This will run all linters and tests. It will automatically bring up the necessary services using the `dev` profile, run the tests, and then shut them down.
-*   `make test`: This will run the unit and integration tests.
-*   `make lint`: This will run all the linters.
+* `make verify`: This will run all linters and tests. It will automatically bring up the necessary services using the `dev` profile, run the tests, and then shut them down.
+* `make test`: This will run the unit and integration tests.
+* `make lint`: This will run all the linters.
 
 If you want to run the application locally for manual testing, you can use the following command:
 
@@ -32,8 +32,8 @@ This will start the application, and you can access it at `http://localhost`.
 
 Before you can deploy, you need the following:
 
-1.  **Docker and Docker Compose:** These are required to build and run the application.
-2.  **A Main Caddy Instance:** You need a main Caddy instance running on the host that acts as the front-facing reverse proxy. This Caddy instance is responsible for routing traffic to the active environment (blue or green).
+1. **Docker and Docker Compose:** These are required to build and run the application.
+1. **A Main Caddy Instance:** You need a main Caddy instance running on the host that acts as the front-facing reverse proxy. This Caddy instance is responsible for routing traffic to the active environment (blue or green).
 
 ### One-time network and volumes
 
@@ -59,9 +59,9 @@ This will start a Caddy container named `loancalc-edge` that uses the `Caddyfile
 
 To deploy a new version of the application, follow these steps:
 
-1.  **Choose an environment to deploy to.** If the current live environment is "blue", you will deploy to "green", and vice-versa.
+1. **Choose an environment to deploy to.** If the current live environment is "blue", you will deploy to "green", and vice-versa.
 
-2.  **Run the deployment script.** Use the `deploy.sh` script with the environment name as an argument.
+1. **Run the deployment script.** Use the `deploy.sh` script with the environment name as an argument.
 
     ```bash
     # To deploy to the blue environment
@@ -71,12 +71,12 @@ To deploy a new version of the application, follow these steps:
     ./deploy.sh green
     ```
 
-3.  **The script will then:**
-    *   Build the Docker images.
-    *   Start the new environment.
-    *   Run health checks against the new environment.
-    *   If the health checks pass, it will generate a new `Caddyfile.edge` file with the correct upstream and reload the edge Caddy.
-    *   Stop the old environment to save resources.
+1. **The script will then:**
+    * Build the Docker images.
+    * Start the new environment.
+    * Run health checks against the new environment.
+    * If the health checks pass, it will generate a new `Caddyfile.edge` file with the correct upstream and reload the edge Caddy.
+    * Stop the old environment to save resources.
 
 ## Rollback
 
