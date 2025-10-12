@@ -153,9 +153,39 @@
         </div>
         
         <div class="expandable-content" id="amortization-content">
-          <p style="text-align: center; color: var(--text-secondary); padding: 20px;">
-            Detailed monthly breakdown coming soon...
-          </p>
+          <div class="amortization-wrapper">
+            <div class="amortization-status" id="amortization-status" role="status" aria-live="polite"></div>
+            <div class="amortization-visual" aria-hidden="false">
+              <div class="amortization-visual-header">
+                <h4>Balance timeline</h4>
+                <p>See how the remaining balance shrinks and principal accumulates each month.</p>
+              </div>
+              <div class="amortization-chart" role="figure" aria-labelledby="amortization-chart-title">
+                <h5 id="amortization-chart-title" class="sr-only">Amortization chart</h5>
+                <canvas id="amortization-chart" aria-label="Line chart of remaining balance and cumulative principal paid over the loan term"></canvas>
+              </div>
+            </div>
+            <div class="amortization-table-container" id="amortization-table-container">
+              <table class="amortization-table" id="amortization-table">
+                <caption class="sr-only">Monthly amortization schedule</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Month</th>
+                    <th scope="col">Payment</th>
+                    <th scope="col">Principal</th>
+                    <th scope="col">Interest</th>
+                    <th scope="col">Balance</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="amortization-controls">
+              <button type="button" class="amortization-toggle" id="amortization-view-toggle" hidden>
+                Show full schedule
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>

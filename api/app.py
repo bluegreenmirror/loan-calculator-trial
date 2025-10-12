@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from decimal import ROUND_HALF_UP, Decimal, getcontext
 from typing import Optional
 
 from fastapi import FastAPI
@@ -33,11 +34,33 @@ class QuoteReq(BaseModel):
     trade_in_value: float = 0.0
 
 
+getcontext().prec = 28
+
+TWO_PLACES = Decimal("0.01")
+
+
+def _to_decimal(value: float) -> Decimal:
+    return Decimal(str(value))
+
+
+def _to_cents(value: Decimal) -> Decimal:
+    return value.quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
+
+
+class AmortizationRow(BaseModel):
+    month: int
+    payment: float
+    principal: float
+    interest: float
+    balance: float
+
+
 class QuoteResp(BaseModel):
     amount_financed: float
     monthly_payment: float
     total_interest: float
     total_cost: float
+    schedule: list[AmortizationRow]
 
 
 @app.get("/api/health")
@@ -47,36 +70,90 @@ def health():
 
 @app.post("/api/quote", response_model=QuoteResp)
 def quote(q: QuoteReq):
-    # Corrected calculation
-    amount_after_trade_in = q.vehicle_price - q.trade_in_value
-    taxes = amount_after_trade_in * q.tax_rate
-    principal = amount_after_trade_in + taxes + q.fees - q.down_payment
-    principal = max(principal, 0)
+    amount_after_trade_in = _to_decimal(q.vehicle_price) - _to_decimal(q.trade_in_value)
+    taxes = amount_after_trade_in * _to_decimal(q.tax_rate)
+    principal = (
+        amount_after_trade_in
+        + taxes
+        + _to_decimal(q.fees)
+        - _to_decimal(q.down_payment)
+    )
+    if principal < 0:
+        principal = Decimal("0")
+    amount_financed = _to_cents(principal)
+    principal = amount_financed
 
     if q.term_months <= 0:
         return QuoteResp(
-            amount_financed=round(principal, 2),
+            amount_financed=float(amount_financed),
             monthly_payment=0,
             total_interest=0,
-            total_cost=round(principal, 2),
+            total_cost=float(amount_financed),
+            schedule=[],
         )
 
-    r = q.apr / 100 / 12
+    r = _to_decimal(q.apr) / Decimal("100") / Decimal("12")
     if r == 0:
-        monthly = principal / q.term_months
+        monthly_payment_decimal = principal / q.term_months
     else:
-        monthly = (
-            principal * (r * (1 + r) ** q.term_months) / ((1 + r) ** q.term_months - 1)
+        factor = (Decimal("1") + r) ** q.term_months
+        monthly_payment_decimal = principal * (r * factor) / (factor - Decimal("1"))
+    monthly_payment = _to_cents(monthly_payment_decimal)
+
+    balance = amount_financed
+    schedule: list[AmortizationRow] = []
+    sum_interest = Decimal("0")
+    sum_principal = Decimal("0")
+
+    for month in range(1, q.term_months + 1):
+        prev_balance = balance
+        if balance == Decimal("0"):
+            interest_payment = Decimal("0")
+        elif r == 0:
+            interest_payment = Decimal("0")
+        else:
+            interest_payment = _to_cents(balance * r)
+        interest_payment = _to_cents(interest_payment)
+
+        principal_payment = monthly_payment - interest_payment
+        if principal_payment < Decimal("0"):
+            principal_payment = Decimal("0")
+            payment_amount = interest_payment
+        else:
+            payment_amount = monthly_payment
+
+        is_last_period = month == q.term_months
+        if principal_payment > prev_balance or is_last_period:
+            principal_payment = prev_balance
+            payment_amount = principal_payment + interest_payment
+
+        principal_payment = _to_cents(principal_payment)
+        payment_amount = _to_cents(payment_amount)
+        balance = _to_cents(prev_balance - principal_payment)
+        sum_interest += interest_payment
+        sum_principal += principal_payment
+
+        schedule.append(
+            AmortizationRow(
+                month=month,
+                payment=float(payment_amount),
+                principal=float(principal_payment),
+                interest=float(interest_payment),
+                balance=float(balance),
+            )
         )
 
-    total_cost = monthly * q.term_months
-    total_interest = total_cost - principal
+    sum_interest = _to_cents(sum_interest)
+    sum_principal = _to_cents(sum_principal)
+    total_interest = float(sum_interest)
+    total_cost = float(_to_cents(sum_principal + sum_interest))
 
     return QuoteResp(
-        amount_financed=round(principal, 2),
-        monthly_payment=round(monthly, 2),
-        total_interest=round(max(total_interest, 0), 2),
-        total_cost=round(total_cost, 2),
+        amount_financed=float(amount_financed),
+        monthly_payment=float(monthly_payment),
+        total_interest=total_interest,
+        total_cost=total_cost,
+        schedule=schedule,
     )
 
 
