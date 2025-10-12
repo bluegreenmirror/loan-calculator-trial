@@ -9,6 +9,7 @@ Jump-start your next ride with a fast, responsive vehicle loan payment calculato
 - ⚡️ **Instant calculator**: monthly payment, amount financed, total cost, total interest.
 - 📊 **Cost breakdown chart**: flat pie chart sized between 200–260px with generous side and canvas padding, highlighting principal vs interest; tooltips float outside each slice and the caret points back at the chart without getting cut off, with the legend beside it.
 - 🎰 **Rolling digits**: payment amounts animate with fast, smooth scrolling numbers.
+- 🗓️ **Amortization schedule**: API-driven monthly breakdown with rounding-safe totals, collapsible pagination for long terms, and responsive formatting for small screens.
 - 🚘 **Presets**: Auto, RV, Motorcycle, Jet Ski.
 - 👨‍⚖️ **Lead capture**: name/email/phone validated and persisted (+ affiliate/UTM captured automatically).
 - 🤝 **Affiliate tracking**: records click metadata; passthrough to form.
@@ -53,6 +54,14 @@ Base URL in dev: `http://localhost`
   ```bash
   curl -s http://localhost/api/quote -X POST -H 'content-type: application/json' \
     -d '{"vehicle_price":35000,"down_payment":3000,"apr":6.9,"term_months":60,"tax_rate":0.095,"fees":495,"trade_in_value":0}'
+  ```
+
+  The response now includes a `schedule` array with one entry per month:
+
+  ```bash
+  curl -s http://localhost/api/quote -X POST -H 'content-type: application/json' \
+    -d '{"vehicle_price":35000,"down_payment":3000,"apr":6.9,"term_months":60,"tax_rate":0.095,"fees":495,"trade_in_value":0}' \
+    | jq '.schedule[:3]'
   ```
 
 - Leads (POST JSON):

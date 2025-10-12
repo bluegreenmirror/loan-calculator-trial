@@ -33,14 +33,156 @@ document.getElementById('vehicle').addEventListener('change', (e) => {
   applyPreset(e.target.value);
 });
 
-function pmnt(principal, aprPct, n) {
-  const r = (aprPct/100)/12;
-  if (r === 0) return principal / n;
-  return principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
-}
-
 function fmt(n){
   return n.toLocaleString(undefined, {style:'currency', currency:'USD'})
+}
+
+const scheduleTableBody = document.querySelector('#amortization-table tbody');
+const scheduleStatusEl = document.getElementById('amortization-status');
+const scheduleToggleBtn = document.getElementById('amortization-view-toggle');
+const scheduleTableContainer = document.getElementById('amortization-table-container');
+const amortizationCanvas = document.getElementById('amortization-chart');
+const SCHEDULE_PAGE_SIZE = 12;
+let scheduleRows = [];
+let scheduleExpanded = false;
+let amortizationChart;
+
+function setScheduleStatus(message, variant = 'info') {
+  if (!scheduleStatusEl) return;
+  scheduleStatusEl.textContent = message || '';
+  scheduleStatusEl.className = `amortization-status${variant ? ` ${variant}` : ''}`;
+}
+
+function renderSchedule() {
+  if (!scheduleTableBody) return;
+  scheduleTableBody.innerHTML = '';
+
+  if (!scheduleRows.length) {
+    scheduleTableContainer?.classList.add('is-empty');
+    return;
+  }
+
+  scheduleTableContainer?.classList.remove('is-empty');
+  const rowsToShow = scheduleExpanded ? scheduleRows : scheduleRows.slice(0, SCHEDULE_PAGE_SIZE);
+
+  rowsToShow.forEach((row) => {
+    const tr = document.createElement('tr');
+    const cells = [
+      { label: 'Month', value: row.month.toString() },
+      { label: 'Payment', value: fmt(row.payment) },
+      { label: 'Principal', value: fmt(row.principal) },
+      { label: 'Interest', value: fmt(row.interest) },
+      { label: 'Balance', value: fmt(row.balance) }
+    ];
+
+    cells.forEach((cell) => {
+      const td = document.createElement('td');
+      td.dataset.label = cell.label;
+      td.textContent = cell.value;
+      tr.appendChild(td);
+    });
+
+    scheduleTableBody.appendChild(tr);
+  });
+}
+
+function updateSchedule(rows) {
+  scheduleRows = (rows || []).map((row) => ({
+    month: row.month,
+    payment: row.payment,
+    principal: row.principal,
+    interest: row.interest,
+    balance: row.balance
+  }));
+  scheduleExpanded = false;
+
+  if (!scheduleRows.length) {
+    renderSchedule();
+    setScheduleStatus('No payments due for this scenario.', 'info');
+    updateAmortizationChart([]);
+    if (scheduleToggleBtn) {
+      scheduleToggleBtn.hidden = true;
+      scheduleToggleBtn.setAttribute('aria-expanded', 'false');
+    }
+    return;
+  }
+
+  renderSchedule();
+  updateAmortizationChart(scheduleRows);
+
+  if (!scheduleToggleBtn) {
+    setScheduleStatus(`Showing all ${scheduleRows.length} months.`, 'info');
+    return;
+  }
+
+  if (scheduleRows.length > SCHEDULE_PAGE_SIZE) {
+    scheduleToggleBtn.hidden = false;
+    scheduleToggleBtn.textContent = `Show full schedule (${scheduleRows.length} months)`;
+    scheduleToggleBtn.setAttribute('aria-expanded', 'false');
+    setScheduleStatus(`Showing first ${SCHEDULE_PAGE_SIZE} of ${scheduleRows.length} months.`, 'info');
+  } else {
+    scheduleToggleBtn.hidden = true;
+    scheduleToggleBtn.setAttribute('aria-expanded', 'false');
+    setScheduleStatus(`Showing all ${scheduleRows.length} months.`, 'info');
+  }
+}
+
+function startScheduleLoading() {
+  scheduleRows = [];
+  scheduleExpanded = false;
+  if (scheduleTableBody) {
+    scheduleTableBody.innerHTML = '';
+  }
+  scheduleTableContainer?.classList.add('is-loading');
+  scheduleTableContainer?.classList.add('is-empty');
+  updateAmortizationChart([]);
+  if (scheduleToggleBtn) {
+    scheduleToggleBtn.hidden = true;
+    scheduleToggleBtn.setAttribute('aria-expanded', 'false');
+  }
+  setScheduleStatus('Loading amortization schedule…', 'loading');
+}
+
+function finishScheduleLoading() {
+  scheduleTableContainer?.classList.remove('is-loading');
+}
+
+function showScheduleError(message) {
+  scheduleRows = [];
+  scheduleExpanded = false;
+  if (scheduleTableBody) {
+    scheduleTableBody.innerHTML = '';
+  }
+  scheduleTableContainer?.classList.remove('is-loading');
+  scheduleTableContainer?.classList.add('is-empty');
+  updateAmortizationChart([]);
+  if (scheduleToggleBtn) {
+    scheduleToggleBtn.hidden = true;
+    scheduleToggleBtn.setAttribute('aria-expanded', 'false');
+  }
+  setScheduleStatus(message, 'error');
+}
+
+if (scheduleToggleBtn) {
+  scheduleToggleBtn.addEventListener('click', () => {
+    if (!scheduleRows.length) return;
+    scheduleExpanded = !scheduleExpanded;
+    renderSchedule();
+    scheduleToggleBtn.setAttribute('aria-expanded', String(scheduleExpanded));
+    if (scheduleExpanded) {
+      scheduleToggleBtn.textContent = 'Collapse schedule';
+      setScheduleStatus(`Showing all ${scheduleRows.length} months.`, 'info');
+    } else {
+      scheduleToggleBtn.textContent = scheduleRows.length > SCHEDULE_PAGE_SIZE
+        ? `Show full schedule (${scheduleRows.length} months)`
+        : 'Show full schedule';
+      if (scheduleRows.length > SCHEDULE_PAGE_SIZE) {
+        setScheduleStatus(`Showing first ${SCHEDULE_PAGE_SIZE} of ${scheduleRows.length} months.`, 'info');
+      } else {
+        setScheduleStatus(`Showing all ${scheduleRows.length} months.`, 'info');
+      }
+    }
+  });
 }
 
 function animateNumber(el, value) {
@@ -90,6 +232,108 @@ function animateNumber(el, value) {
 }
 
 let costChart;
+
+function destroyAmortizationChart() {
+  if (amortizationChart) {
+    amortizationChart.destroy();
+    amortizationChart = null;
+  }
+  amortizationCanvas?.classList.add('is-empty');
+}
+
+function updateAmortizationChart(rows) {
+  if (!amortizationCanvas) return;
+
+  if (!rows || !rows.length) {
+    destroyAmortizationChart();
+    return;
+  }
+
+  const labels = rows.map((row) => `Month ${row.month}`);
+  const balanceSeries = rows.map((row) => Number(row.balance));
+  let cumulative = 0;
+  const principalSeries = rows.map((row) => {
+    cumulative += Number(row.principal);
+    return Number(cumulative.toFixed(2));
+  });
+
+  if (!amortizationChart) {
+    amortizationChart = new Chart(amortizationCanvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Remaining balance',
+            data: balanceSeries,
+            borderColor: '#1d4ed8',
+            backgroundColor: 'rgba(29, 78, 216, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 0
+          },
+          {
+            label: 'Cumulative principal paid',
+            data: principalSeries,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 10
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            },
+            ticks: {
+              maxTicksLimit: 12
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Amount (USD)'
+            },
+            ticks: {
+              callback: (value) => fmt(value)
+            }
+          }
+        }
+      }
+    });
+  } else {
+    amortizationChart.data.labels = labels;
+    amortizationChart.data.datasets[0].data = balanceSeries;
+    amortizationChart.data.datasets[1].data = principalSeries;
+    amortizationChart.update('none');
+  }
+
+  amortizationCanvas.classList.remove('is-empty');
+}
 
 // Grab Chart.js' Tooltip helper so we can extend it. When using the CDN build
 // the helper lives on the global `Chart` object.
@@ -156,74 +400,103 @@ function updateChart(principal, interest) {
   canvas.classList.add('bounce');
 }
 
-function calc(){
+async function calc(){
   const calcBtn = document.getElementById('calc');
   const calcStatus = document.getElementById('calc-status');
-  
-  // Get values
-  const price = +document.getElementById('price').value || 0;
-  const term = +document.getElementById('term').value || 1;
-  const termUnit = document.querySelector('input[name="term-unit"]:checked').value;
-  const apr = +document.getElementById('apr').value || 0;
-  const down = +document.getElementById('down').value || 0;
-  const fees = +document.getElementById('fees').value || 0;
+  if (!calcBtn || !calcStatus) return;
 
-  // Convert term to months if needed
-  const termMonths = termUnit === 'years' ? term * 12 : term;
+  const price = parseFloat(document.getElementById('price').value) || 0;
+  const termValue = parseFloat(document.getElementById('term').value) || 0;
+  const termUnitInput = document.querySelector('input[name="term-unit"]:checked');
+  const termUnit = termUnitInput ? termUnitInput.value : 'years';
+  const apr = parseFloat(document.getElementById('apr').value) || 0;
+  const down = parseFloat(document.getElementById('down').value) || 0;
+  const fees = parseFloat(document.getElementById('fees').value) || 0;
 
-  // Show loading state
+  const termMonthsRaw = termUnit === 'years' ? termValue * 12 : termValue;
+  const termMonths = Math.max(Math.round(termMonthsRaw), 0);
+
   calcBtn.disabled = true;
   calcBtn.textContent = 'Calculating...';
   calcStatus.className = 'calculation-status';
   calcStatus.textContent = '';
 
-  // Simulate calculation delay for better UX
-  setTimeout(() => {
-    try {
-      if (price <= 0) {
-        throw new Error('Vehicle loan amount must be greater than 0');
-      }
-      
-      if (apr < 0 || apr > 100) {
-        throw new Error('Interest rate must be between 0 and 100');
-      }
-      
-      if (termMonths <= 0) {
-        throw new Error('Vehicle loan term must be greater than 0');
-      }
-
-      const principal = Math.max(price + fees - down, 0);
-      const monthly = pmnt(principal, apr, termMonths);
-      const total = monthly * termMonths;
-      const interest = Math.max(total - principal, 0);
-
-      animateNumber(document.getElementById('fin'), principal);
-      animateNumber(document.getElementById('pay'), monthly);
-      animateNumber(document.getElementById('int'), interest);
-      animateNumber(document.getElementById('tot'), total);
-      
-      updateChart(principal, interest);
-      
-      // Show success status
-      calcStatus.className = 'calculation-status show success';
-      calcStatus.textContent = 'Calculation completed successfully!';
-      
-    } catch (error) {
-      // Show error status
-      calcStatus.className = 'calculation-status show error';
-      calcStatus.textContent = error.message;
-      
-      // Reset results
-      animateNumber(document.getElementById('fin'), 0);
-      animateNumber(document.getElementById('pay'), 0);
-      animateNumber(document.getElementById('int'), 0);
-      animateNumber(document.getElementById('tot'), 0);
-    } finally {
-      // Reset button state
-      calcBtn.disabled = false;
-      calcBtn.textContent = 'Calculate';
+  try {
+    if (price <= 0) {
+      throw new Error('Vehicle loan amount must be greater than 0');
     }
-  }, 500);
+    if (apr < 0 || apr > 100) {
+      throw new Error('Interest rate must be between 0 and 100');
+    }
+    if (termMonths <= 0) {
+      throw new Error('Vehicle loan term must be greater than 0 months');
+    }
+    if (down < 0) {
+      throw new Error('Down payment cannot be negative');
+    }
+    if (fees < 0) {
+      throw new Error('Additional fees cannot be negative');
+    }
+
+    startScheduleLoading();
+
+    const payload = {
+      vehicle_price: price,
+      down_payment: down,
+      apr,
+      term_months: termMonths,
+      tax_rate: 0,
+      fees,
+      trade_in_value: 0
+    };
+
+    const response = await fetch('/api/quote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      let message = 'Unable to compute loan details. Please try again.';
+      try {
+        const errBody = await response.json();
+        if (Array.isArray(errBody?.detail) && errBody.detail.length) {
+          message = errBody.detail[0]?.msg || message;
+        }
+      } catch (err) {
+        console.error('Failed to parse error response', err);
+      }
+      throw new Error(message);
+    }
+
+    const data = await response.json();
+    finishScheduleLoading();
+
+    animateNumber(document.getElementById('fin'), data.amount_financed);
+    animateNumber(document.getElementById('pay'), data.monthly_payment);
+    animateNumber(document.getElementById('int'), data.total_interest);
+    animateNumber(document.getElementById('tot'), data.total_cost);
+
+    updateChart(data.amount_financed, data.total_interest);
+    updateSchedule(data.schedule || []);
+
+    calcStatus.className = 'calculation-status show success';
+    calcStatus.textContent = 'Calculation completed successfully!';
+  } catch (error) {
+    finishScheduleLoading();
+    showScheduleError(`Unable to compute schedule: ${error.message}`);
+    calcStatus.className = 'calculation-status show error';
+    calcStatus.textContent = error.message;
+    animateNumber(document.getElementById('fin'), 0);
+    animateNumber(document.getElementById('pay'), 0);
+    animateNumber(document.getElementById('int'), 0);
+    animateNumber(document.getElementById('tot'), 0);
+  } finally {
+    calcBtn.disabled = false;
+    calcBtn.textContent = 'Calculate';
+  }
 }
 
 function toggleExpandable(sectionId) {

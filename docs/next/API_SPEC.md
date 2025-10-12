@@ -31,20 +31,43 @@ Response:
 
 ```json
 {
-  "ok": true,
-  "data": {
-    "monthly_payment": 691.23,
-    "amount_financed": 32000.00,
-    "total_interest": 9153.80,
-    "total_cost": 44153.80
-  }
+  "amount_financed": 35820.0,
+  "monthly_payment": 707.59,
+  "total_interest": 6635.43,
+  "total_cost": 42455.43,
+  "schedule": [
+    {
+      "month": 1,
+      "payment": 707.59,
+      "principal": 501.62,
+      "interest": 205.97,
+      "balance": 35318.38
+    },
+    {
+      "month": 2,
+      "payment": 707.59,
+      "principal": 504.51,
+      "interest": 203.08,
+      "balance": 34813.87
+    },
+    {
+      "month": 60,
+      "payment": 707.62,
+      "principal": 703.57,
+      "interest": 4.05,
+      "balance": 0.0
+    }
+  ]
 }
 ```
 
+- `schedule` contains one entry per month with payments rounded to cents. The final row absorbs any rounding drift so the balance closes at `$0.00`.
+
 Validation:
 
-- `vehicle_price > 0`, `term_months in [6..120]`, `apr in [0..100)`, rates as decimals (e.g., 9.5% => 9.5).
-- Optional fields default to 0 if omitted.
+- `vehicle_price > 0`, `term_months > 0`, `apr >= 0`, and amounts may be passed as whole numbers or decimals (`9.5` for 9.5%).
+- `down_payment`, `fees`, `tax_rate`, and `trade_in_value` default to `0` when omitted.
+- Zero-APR loans are supported; `interest` will be `0.0` for every row.
 
 ## POST /api/leads
 
