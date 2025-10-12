@@ -59,23 +59,40 @@ sed "s|##LIVE_UPSTREAM##|${PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.cad
 
 # Reload the main Caddy instance
 echo "Reloading edge Caddy instance..."
-if docker ps -a --format '{{.Names}}' | grep -qx "loancalc-edge"; then
-  docker start loancalc-edge >/dev/null 2>&1 || true
+EDGE_CONTAINER_NAME="loancalc-edge"
+if docker ps -a --format '{{.Names}}' | grep -qx "$EDGE_CONTAINER_NAME"; then
+  docker start "$EDGE_CONTAINER_NAME" >/dev/null 2>&1 || true
 else
   docker compose up -d edge
 fi
-EDGE_CONTAINER_ID=$(docker ps -qf "name=loancalc-edge")
-docker kill -s SIGHUP "$EDGE_CONTAINER_ID"
+EDGE_CONTAINER_ID=$(docker ps -qf "name=^${EDGE_CONTAINER_NAME}$")
+if [ -z "$EDGE_CONTAINER_ID" ]; then
+  echo "Edge Caddy container failed to start."
+  exit 1
+fi
+if ! docker exec "$EDGE_CONTAINER_NAME" caddy reload --config /etc/caddy/Caddyfile >/dev/null; then
+  echo "Failed to reload edge Caddy configuration."
+  exit 1
+fi
 sleep 5
 
 rollback_edge() {
   echo "Rolling back edge to $OLD_PROJECT_NAME..."
   sed "s|##LIVE_UPSTREAM##|${OLD_PROJECT_NAME}-caddy:80|g" Caddyfile.edge.template.caddyfile > Caddyfile.edge
-  local EDGE_ID
-  EDGE_ID=$(docker ps -qf "name=loancalc-edge")
-  docker kill -s SIGHUP "$EDGE_ID"
+  if ! docker exec "$EDGE_CONTAINER_NAME" caddy reload --config /etc/caddy/Caddyfile >/dev/null; then
+    echo "Failed to reload edge Caddy during rollback."
+    exit 1
+  fi
   sleep 5
 }
+
+echo "Validating edge Caddy configuration..."
+EDGE_CONFIG=$(docker exec "$EDGE_CONTAINER_NAME" caddy adapt --config /etc/caddy/Caddyfile)
+if ! grep -q "${PROJECT_NAME}-caddy:80" <<<"$EDGE_CONFIG"; then
+  echo "Edge Caddy configuration missing upstream ${PROJECT_NAME}-caddy:80"
+  rollback_edge
+  exit 1
+fi
 
 # Internal upstream health from edge container (network reachability)
 echo "Verifying upstream from edge network..."
